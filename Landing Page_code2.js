@@ -343,8 +343,10 @@
 
     /* ── Onboarding ──────────────────────────────────────────────────── */
     #rwO {
-      /* Width of the header line and the cards. Shared, so their edges always line up. */
-      --content-w: min(clamp(1180px, calc(83.4 * var(--vw, 1vw)), 1600px), 100%);
+      /* Width of the header line and the cards. Shared, so their edges always line up.
+         This is the main dial for how big the cards are: lower 1040px and 1240px for smaller cards.
+         The 45 only takes over on very large displays, past about 2750px wide. */
+      --content-w: min(max(clamp(1040px, calc(60 * var(--vw, 1vw)), 1240px), calc(45 * var(--vw, 1vw))), 100%);
       /* Distance from the screen edge to the thin gold frame */
       --frame: clamp(12px, calc(1.6 * var(--vw, 1vw)), 32px);
 
@@ -394,7 +396,7 @@
 
     #rwO .cols {
       display: grid; grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
-      gap: clamp(20px, calc(4.5 * var(--vw, 1vw)), 96px); width: 100%; align-items: stretch;
+      gap: clamp(20px, calc(4.5 * var(--vw, 1vw)), 72px); width: 100%; align-items: stretch;
       margin-inline: auto;
     }
     #rwO .sep {
@@ -407,7 +409,7 @@
     #rwO .card {
       display: flex; flex-direction: column; align-items: center; text-align: center;
       width: 100%; min-width: 0;
-      padding: clamp(24px, calc(3.5 * var(--vw, 1vw)), 64px) clamp(20px, calc(3 * var(--vw, 1vw)), 56px);
+      padding: clamp(24px, calc(3 * var(--vw, 1vw)), 48px) clamp(20px, calc(2.6 * var(--vw, 1vw)), 44px);
       background: rgba(255, 255, 255, 0.025);
       border: 1px solid rgba(201, 174, 114, 0.18);
       border-radius: 12px;
@@ -423,13 +425,13 @@
       gap: 28px; height: 72px; margin-bottom: 24px;
     }
     #rwO .ico > i { width: 1px; height: 32px; background: var(--hairline); }
-    @media (min-width: 2200px) { #rwO:not(.m) .ico { zoom: 1.4; } }
-    @media (min-width: 3200px) { #rwO:not(.m) .ico { zoom: 1.9; } }
-    @media (min-width: 900px) { #rwO.m .ico { zoom: 1.5; } }
+    @media (min-width: 2200px) { #rwO:not(.m) .ico { zoom: 1.2; } }
+    @media (min-width: 3200px) { #rwO:not(.m) .ico { zoom: 1.5; } }
+    @media (min-width: 900px) { #rwO.m .ico { zoom: 1.2; } }
     #rwO h2 {
       margin-bottom: .45em;
       padding-left: .08em; /* balances the letter-spacing after the last letter */
-      font: 400 clamp(26px, calc(2.8 * var(--vw, 1vw)), 64px)/1.1 var(--serif); letter-spacing: .08em; text-transform: uppercase;
+      font: 400 max(clamp(26px, calc(2.6 * var(--vw, 1vw)), 42px), calc(1.6 * var(--vw, 1vw)))/1.1 var(--serif); letter-spacing: .08em; text-transform: uppercase;
       background: linear-gradient(180deg, var(--gold-light), var(--gold) 70%, #B39255);
       -webkit-background-clip: text; background-clip: text; color: transparent;
     }
@@ -437,7 +439,7 @@
        while the icons and titles stay level with each other. */
     #rwO .card p {
       max-width: 26em; margin-block: auto; text-wrap: balance;
-      font-size: clamp(15px, calc(1.15 * var(--vw, 1vw)), 24px); line-height: 1.65; color: var(--text-soft); font-weight: 300;
+      font-size: max(clamp(15px, calc(1.15 * var(--vw, 1vw)), 19px), calc(.72 * var(--vw, 1vw))); line-height: 1.65; color: var(--text-soft); font-weight: 300;
     }
 
     #rwO .act { display: flex; flex-direction: column; align-items: center; gap: 18px; margin-top: 8px; }
@@ -498,7 +500,7 @@
     #rwO.short .go { height: 44px; padding: 0 28px; font-size: 12px; }
 
     /* Onboarding: portrait, any size */
-    #rwO.m { --pad: clamp(20px, calc(6 * var(--vw, 1vw)), 72px); --content-w: min(960px, 100%); }
+    #rwO.m { --pad: clamp(20px, calc(6 * var(--vw, 1vw)), 72px); --content-w: min(clamp(560px, calc(62 * var(--vw, 1vw)), 760px), 100%); }
     #rwO.m .hd { gap: clamp(16px, calc(4 * var(--vw, 1vw)), 48px); }
     #rwO.m .hd img.logo-main { height: clamp(36px, calc(8 * var(--vw, 1vw)), 96px); }
     #rwO.m .hd img.logo-dev { height: clamp(32px, calc(7 * var(--vw, 1vw)), 84px); }
@@ -512,10 +514,10 @@
       background: linear-gradient(90deg, transparent, var(--rule) 30%, var(--rule) 40%, transparent 40%,
                                          transparent 60%, var(--rule) 60%, var(--rule) 70%, transparent);
     }
-    #rwO.m .card { padding: clamp(20px, calc(5 * var(--vw, 1vw)), 56px); }
+    #rwO.m .card { padding: clamp(20px, calc(5 * var(--vw, 1vw)), 36px); }
     #rwO.m .ico { height: 56px; margin-bottom: 12px; }
-    #rwO.m h2 { font-size: clamp(24px, calc(5.4 * var(--vw, 1vw)), 56px); }
-    #rwO.m .card p { font-size: clamp(15px, calc(3 * var(--vw, 1vw)), 26px); }
+    #rwO.m h2 { font-size: clamp(24px, calc(5.4 * var(--vw, 1vw)), 42px); }
+    #rwO.m .card p { font-size: clamp(15px, calc(3 * var(--vw, 1vw)), 19px); }
     #rwO.m .act { width: 100%; }
     #rwO.m .go { width: 100%; justify-content: center; padding: 0 20px; }
   `;
