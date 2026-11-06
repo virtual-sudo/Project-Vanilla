@@ -386,7 +386,11 @@
     }
     #rwO .ey::before, #rwO .ey::after { content: ""; width: clamp(40px, calc(4 * var(--vw, 1vw)), 96px); height: 1px; background: var(--rule); }
 
-    #rwO .cols { display: grid; grid-template-columns: 1fr auto 1fr; gap: clamp(20px, calc(4.5 * var(--vw, 1vw)), 96px); width: 100%; align-items: stretch; }
+    #rwO .cols {
+      display: grid; grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
+      gap: clamp(20px, calc(4.5 * var(--vw, 1vw)), 96px); width: 100%; align-items: stretch;
+      margin-inline: auto;
+    }
     #rwO .sep {
       position: relative; width: 1px; align-self: stretch;
       background: linear-gradient(180deg, transparent, var(--rule) 20%, var(--rule) 40%, transparent 40%,
@@ -396,6 +400,7 @@
 
     #rwO .card {
       display: flex; flex-direction: column; align-items: center; text-align: center;
+      width: 100%; min-width: 0;
       padding: clamp(24px, calc(3.5 * var(--vw, 1vw)), 64px) clamp(20px, calc(3 * var(--vw, 1vw)), 56px);
       background: rgba(255, 255, 255, 0.025);
       border: 1px solid rgba(201, 174, 114, 0.18);
