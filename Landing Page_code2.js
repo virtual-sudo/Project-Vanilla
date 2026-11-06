@@ -66,7 +66,7 @@
   /* Layout thresholds (CSS px, after 3DVista's phone zoom is undone) */
   const SHORT_HEIGHT = 560;        // landscape screens shorter than this use the compact layout
   const WORD_MAX_VH = 0.18;        // the wordmark never gets taller than 18% of the screen height
-  const WORD_MAX_PX = 180;         // keeps the wordmark from becoming oversized on large displays
+  const WORD_MAX_PX = 130;         // keeps the wordmark balanced on large displays
 
 
   /* 2. Graphics & Icons --------------------------------------------------- */
