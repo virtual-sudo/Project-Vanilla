@@ -8,7 +8,7 @@
      same composition, tighter bar, smaller notes and a height-capped wordmark.
    - .m      (any portrait screen, phone to tall monitor): one column -
      bar, star, wordmark, place, intro and button - sized with the screen width.
-   Big screens keep scaling up instead of stopping at laptop sizes.
+   Big screens scale up to a display-size cap.
 
    Typography: DM Sans for body & captions; Rawan Sans for display headlines.
 
@@ -65,7 +65,8 @@
 
   /* Layout thresholds (CSS px, after 3DVista's phone zoom is undone) */
   const SHORT_HEIGHT = 560;        // landscape screens shorter than this use the compact layout
-  const WORD_MAX_VH = 0.18;        // the wordmark never gets taller than 22% of the screen height
+  const WORD_MAX_VH = 0.18;        // the wordmark never gets taller than 18% of the screen height
+  const WORD_MAX_PX = 180;         // keeps the wordmark from becoming oversized on large displays
 
 
   /* 2. Graphics & Icons --------------------------------------------------- */
@@ -274,7 +275,7 @@
       background: linear-gradient(to top, rgba(14, 15, 28, .92) 0%, rgba(14, 15, 28, .6) 40%, transparent 100%);
     }
 
-    /* Giant wordmark: fitted to the width by the script, capped by the screen height */
+    /* Giant wordmark: fitted to the width by the script and capped for large displays */
     #rwS .word {
       position: absolute; z-index: 3; left: var(--pad); right: var(--pad); bottom: calc(1.5 * var(--vh, 1vh));
       overflow: hidden; text-align: center; pointer-events: none;
@@ -763,8 +764,8 @@
        hiding it again when the intro starts. */
     enter(beam, [{ opacity: 0 }, { opacity: 1 }], { duration: 2400, easing: 'ease-out' });
 
-    /* Fit the wordmark to the available width, but never taller than WORD_MAX_VH of the screen
-       (landscape only). Then publish the bar and wordmark heights so the notes can avoid them. */
+    /* Fit the wordmark to the available width, with viewport-height and absolute size caps.
+       Then publish the bar and wordmark heights so the notes can avoid them. */
     function fitWord() {
       const avail = word.clientWidth;
       if (!avail) return;
@@ -772,7 +773,7 @@
       const natural = h1.scrollWidth;
       if (!natural) return;
       let size = 100 * avail / natural;
-      if (!page.classList.contains('m')) size = Math.min(size, page.clientHeight * WORD_MAX_VH);
+      size = Math.min(size, page.clientHeight * WORD_MAX_VH, WORD_MAX_PX);
       h1.style.fontSize = size.toFixed(2) + 'px';
       page.style.setProperty('--word-h', h1.offsetHeight + 'px');
       page.style.setProperty('--bar-h', bar.offsetHeight + 'px');
