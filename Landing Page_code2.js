@@ -66,7 +66,7 @@
   /* Layout thresholds (CSS px, after 3DVista's phone zoom is undone) */
   const SHORT_HEIGHT = 560;        // landscape screens shorter than this use the compact layout
   const WORD_MAX_VH = 0.18;        // the wordmark never gets taller than 18% of the screen height
-  const WORD_MAX_PX = 130;         // keeps the wordmark balanced on large displays
+  const WORD_MAX_PX = 140;          // keeps the wordmark balanced on large displays
 
 
   /* 2. Graphics & Icons --------------------------------------------------- */
@@ -282,7 +282,7 @@
     }
     #rwS .word h1 {
       display: inline-block; white-space: nowrap;
-      font: 400 120px/.86 var(--serif); letter-spacing: .01em; word-spacing: -.12em; text-transform: uppercase;
+      font: 400 120px/.86 var(--serif); letter-spacing: .01em; word-spacing: -.08em; text-transform: uppercase;
       color: var(--cream); text-shadow: 0 6px 40px rgba(10, 12, 24, .55);
     }
     #rwS .word h1 span { display: inline-block; }
