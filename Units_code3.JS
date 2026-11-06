@@ -1,13 +1,13 @@
 /* =====================================================================
-   THE RAWAN | Script 3: Side menu panels (About + Residences)
+   THE RAWAN | Script 3: Side menu panels (Rawan Estate + Kayen)
    Fills the panel inside the side menu that navigation.js builds.
 
    FILE MAP (search for the section name to jump there)
      SECTION 1  Content: text, images, units   <-- most edits happen here
      SECTION 2  Styles
      SECTION 3  Small helpers
-     SECTION 4  About panel
-     SECTION 5  Residences panel
+     SECTION 4  Rawan Estate panel
+     SECTION 5  Kayen panel
      SECTION 6  Connect to the side menu
 
    Colours and fonts such as var(--gold) come from the top of SECTION 3 in navigation.js.
@@ -33,7 +33,7 @@
        A unit's own href wins over this. Leave empty to do nothing. */
     inquireUrl: '',
 
-    /* "About" in the side menu */
+    /* "Rawan Estate" in the side menu */
     overview: {
       image: IMG + 'bg.png',
       imageLabel: 'Entrance',
@@ -60,7 +60,7 @@
       }
     },
 
-    /* "Residences" in the side menu */
+    /* "Kayen" in the side menu. Add a photo by filling in image, like the gallery above. */
     units: [
       { name: 'Studio',    size: 'Size to be confirmed', image: '', href: '' },
       { name: '1 Bedroom', size: 'Size to be confirmed', image: '', href: '' },
@@ -133,7 +133,7 @@
     #rw-panel .rw-placeholder svg { width: 24px; opacity: .7; }
 
 
-    /* ---------- About panel ---------- */
+    /* ---------- Rawan Estate panel ---------- */
     #rw-panel .rw-intro { margin: 16px 0 4px; font-size: 14px; font-weight: 300; line-height: 1.7; }
 
     #rw-panel .rw-pillar { display: flex; gap: 14px; padding: 14px 0; border-top: 1px solid var(--line-faint); }
@@ -165,7 +165,7 @@
     #rw-panel .rw-btn-orange:active { transform: scale(.98); background: var(--peach); }
 
 
-    /* ---------- Residences panel ---------- */
+    /* ---------- Kayen panel ---------- */
     #rw-panel .rw-unit {
       position: relative; padding: 16px; border-radius: 10px;
       background: rgba(255, 255, 255, .02);
@@ -272,7 +272,7 @@
 
 
   /* =================================================================
-     SECTION 4. ABOUT PANEL
+     SECTION 4. RAWAN ESTATE PANEL
      ================================================================= */
   function pillarRow(pillar, i) {
     return el('div', 'rw-pillar', `
@@ -317,7 +317,7 @@
 
 
   /* =================================================================
-     SECTION 5. RESIDENCES PANEL
+     SECTION 5. KAYEN PANEL
      ================================================================= */
   function unitCard(unit, i) {
     const total = CONTENT.units.length;
