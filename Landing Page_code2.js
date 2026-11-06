@@ -13,19 +13,20 @@
    Typography: DM Sans for body & captions; Rawan Sans for display headlines.
 
    NOTE: 3DVista injects this script as an escaped string, which strips
-   every backslash. Never use backslashes anywhere in this file.
+   every backslash and every line break. Never use backslashes anywhere in
+   this file, and end every statement with a semicolon.
    ========================================================================== */
 (function () {
   'use strict';
 
   /* 1. Settings ------------------------------------------------------------ */
 
-  const IMAGE = 'https://github.com/virtual-sudo/The-Rawan-/blob/main/WATERFALL%20OASIS.png?raw=true';
+  const IMAGE = 'https://raw.githubusercontent.com/virtual-sudo/The-Rawan-/main/WATERFALL%20OASIS.png';
 
   const SETTINGS = {
-    logo: 'https://github.com/virtual-sudo/The-Rawan-/blob/main/Rawan%20Logo%20-%20Full%20Color_The%20Rawan%20Logo%20H%20-%20Gold.png?raw=true',
-    partnerLogo: 'https://github.com/jiaseeds/artha-sondris/blob/main/image%20(2).png?raw=true',
-    developerLogo: 'https://github.com/jiaseeds/artha_logo/blob/main/arthaland-logo.png?raw=true',
+    logo: 'https://raw.githubusercontent.com/virtual-sudo/The-Rawan-/main/Rawan%20Logo%20-%20Full%20Color_The%20Rawan%20Logo%20H%20-%20Gold.png',
+    partnerLogo: 'https://raw.githubusercontent.com/jiaseeds/artha-sondris/main/image%20(2).png',
+    developerLogo: 'https://raw.githubusercontent.com/jiaseeds/artha_logo/main/arthaland-logo.png',
     image: IMAGE,
     focus: '50% 52%',
     zoom: 1.1,
@@ -57,13 +58,14 @@
   const REDUCED_MOTION = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   const FINE_POINTER = window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches;
 
+  /* Same stylesheet URL as Script 1, so DM Sans is only downloaded once */
   const FONTS = 'https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300..700;1,9..40,300..700&display=swap';
   const EASE_OUT = 'cubic-bezier(.215, .61, .355, 1)';
   const LUXE_EASE = 'cubic-bezier(.16, 1, .3, 1)';
 
   /* Layout thresholds (CSS px, after 3DVista's phone zoom is undone) */
   const SHORT_HEIGHT = 560;        // landscape screens shorter than this use the compact layout
-  const WORD_MAX_VH = 0.22;        // the wordmark never gets taller than 22% of the screen height
+  const WORD_MAX_VH = 0.18;        // the wordmark never gets taller than 22% of the screen height
 
 
   /* 2. Graphics & Icons --------------------------------------------------- */
@@ -142,8 +144,6 @@
     down: line('<path d="M12 6v12M7 13l5 5 5-5"/>'),
     left: line('<path d="M18 12H6M11 7l-5 5 5 5"/>'),
     right: line('<path d="M6 12h12M13 7l5 5-5 5"/>'),
-    hand: line('<path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V10m0-.5a1.5 1.5 0 0 1 3 0V11m0-.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-.6a5 5 0 0 1-4.1-2.2L4.6 15a1.5 1.5 0 0 1 2.3-1.9L9 15"/>'),
-    swipe: line('<path d="M4 7h8M4 7l2.5-2.5M4 7l2.5 2.5M20 7h-8M20 7l-2.5-2.5M20 7l-2.5 2.5"/>'),
     cursor: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 3l16 7.2-6.6 2.1L10.6 19z"/></svg>',
   };
 
@@ -419,13 +419,12 @@
 
     #rwO .act { display: flex; flex-direction: column; align-items: center; gap: 18px; margin-top: 8px; }
     #rwO .go {
-      display: inline-flex; align-items: center; gap: 1.2em;
-      height: clamp(56px, calc(4.3 * var(--vw, 1vw)), 88px); padding: 0 clamp(36px, calc(3 * var(--vw, 1vw)), 64px); border-radius: 999px;
+      display: inline-flex; align-items: center; gap: 16px; height: 62px; padding: 0 44px; border-radius: 31px;
       background: linear-gradient(135deg, #FF7052 0%, #E65335 100%); color: #FFFFFF; border: 1px solid rgba(255, 255, 255, .3);
-      font: 600 clamp(13px, calc(.9 * var(--vw, 1vw)), 19px)/1 var(--sans); letter-spacing: .2em; text-transform: uppercase;
+      font: 600 13px/1 var(--sans); letter-spacing: .2em; text-transform: uppercase;
       transition: transform .2s var(--ease-out);
     }
-    #rwO .go svg { width: 1.4em; height: 1.4em; transition: transform .3s var(--ease-out); }
+    #rwO .go svg { width: 18px; height: 18px; transition: transform .3s var(--ease-out); }
     #rwO .go:active { transform: scale(.97); }
     @media (hover: hover) and (pointer: fine) {
       #rwO .go:hover { background: linear-gradient(135deg, #FF8064 0%, #FF5D3B 100%); transform: translateY(-2px); }
@@ -496,7 +495,7 @@
     #rwO.m h2 { font-size: clamp(24px, calc(5.4 * var(--vw, 1vw)), 56px); }
     #rwO.m .card p { font-size: clamp(15px, calc(3 * var(--vw, 1vw)), 26px); }
     #rwO.m .act { width: 100%; }
-    #rwO.m .go { width: 100%; justify-content: space-between; height: clamp(54px, calc(11 * var(--vw, 1vw)), 96px); font-size: clamp(13px, calc(2.6 * var(--vw, 1vw)), 22px); }
+    #rwO.m .go { width: 100%; justify-content: space-between; }
   `;
 
 
@@ -510,6 +509,9 @@
     doc.head.appendChild(el('link', { rel: 'stylesheet', href: FONTS }));
   }
 
+  /* Plays a Web Animation. Exit animations keep their end state (fill: both) until the
+     element is removed. Entrance animations pass fill: 'backwards' so they let go of the
+     element when they finish - otherwise they would keep overriding CSS (hover lifts etc). */
   function play(node, frames, options) {
     if (!node || !node.animate) return null;
     if (REDUCED_MOTION) {
@@ -519,20 +521,37 @@
     return node.animate(frames, Object.assign({ fill: 'both' }, options));
   }
 
+  const enter = (node, frames, options) => play(node, frames, Object.assign({ fill: 'backwards' }, options));
+
   const rise = (node, distance, duration, delay) =>
-    play(node, [{ opacity: 0, transform: `translateY(${distance}px)` }, { opacity: 1, transform: 'none' }],
+    enter(node, [{ opacity: 0, transform: `translateY(${distance}px)` }, { opacity: 1, transform: 'none' }],
       { duration, delay, easing: LUXE_EASE });
+
+  /* How much the browser is shrinking the page. 3DVista asks for half size on phones
+     (initial-scale=0.5 in the viewport tag), but Chrome and Firefox ignore that in fullscreen and
+     show the page at full size, so in fullscreen the browser's live value is used instead. */
+  function pageScale() {
+    let scale;
+    if (window.visualViewport && (doc.fullscreenElement || doc.webkitFullscreenElement)) {
+      scale = window.visualViewport.scale;
+    } else {
+      const meta = doc.querySelector('meta[name=viewport]');
+      const match = meta && /initial-scale=([0-9.]+)/.exec(meta.content);
+      scale = match ? +match[1] : 1;
+    }
+    return scale > 0 && scale < 1 ? scale : 1;
+  }
 
   /* Undo 3DVista's phone zoom (it sets initial-scale=0.5) and pick the layout:
      portrait screens of any size get the one-column layout (.m);
-     landscape screens under SHORT_HEIGHT get the compact layout (.short). */
+     landscape screens under SHORT_HEIGHT get the compact layout (.short).
+     Runs once straight away, then at most once per frame on resize. */
   function fitToScreen(node, onChange) {
     let lastScale = -1;
+    let queued = 0;
     const update = () => {
-      const meta = doc.querySelector('meta[name=viewport]');
-      const match = meta && /initial-scale=([0-9.]+)/.exec(meta.content);
-      let scale = match ? +match[1] : 1;
-      if (!(scale > 0 && scale < 1)) scale = 1;
+      queued = 0;
+      const scale = pageScale();
       if (scale !== lastScale) {
         lastScale = scale;
         node.style.zoom = scale < 1 ? String(1 / scale) : '';
@@ -546,14 +565,22 @@
       node.classList.toggle('short', !portrait && innerHeight * scale < SHORT_HEIGHT);
       if (onChange) onChange();
     };
+    const schedule = () => { if (!queued) queued = requestAnimationFrame(update); };
     update();
-    window.addEventListener('resize', update, { passive: true });
-    window.addEventListener('orientationchange', update);
-    const observer = window.MutationObserver && new MutationObserver(update);
+    window.addEventListener('resize', schedule, { passive: true });
+    window.addEventListener('orientationchange', schedule);
+    doc.addEventListener('fullscreenchange', schedule);
+    doc.addEventListener('webkitfullscreenchange', schedule);
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', schedule);
+    const observer = window.MutationObserver && new MutationObserver(schedule);
     if (observer) observer.observe(doc.head, { childList: true, subtree: true, attributes: true, attributeFilter: ['content'] });
     return () => {
-      window.removeEventListener('resize', update);
-      window.removeEventListener('orientationchange', update);
+      if (queued) cancelAnimationFrame(queued);
+      window.removeEventListener('resize', schedule);
+      window.removeEventListener('orientationchange', schedule);
+      doc.removeEventListener('fullscreenchange', schedule);
+      doc.removeEventListener('webkitfullscreenchange', schedule);
+      if (window.visualViewport) window.visualViewport.removeEventListener('resize', schedule);
       if (observer) observer.disconnect();
     };
   }
@@ -566,12 +593,9 @@
 
     const touch = !FINE_POINTER;
     const key = (k) => `<span class="key ${k[0]}">${ICONS[k]}</span>`;
-    const lookIcons = touch
-      ? `<span class="hand drag">${ICONS.hand}</span><i></i><span class="swipe">${ICONS.swipe}</span>`
-      : `<span class="mouse"></span><i></i><span class="keys">${['up', 'left', 'down', 'right'].map(key).join('')}</span>`;
-    const moveIcons = touch
-      ? `<span class="hand tap">${ICONS.hand}</span><i></i><span class="hot">${STAR}</span>`
-      : `<span class="cursor">${ICONS.cursor}</span><i></i><span class="hot">${STAR}</span>`;
+    /* Same icons on every device (only the wording changes for touch screens) */
+    const lookIcons = `<span class="mouse"></span><i></i><span class="keys">${['up', 'left', 'down', 'right'].map(key).join('')}</span>`;
+    const moveIcons = `<span class="cursor">${ICONS.cursor}</span><i></i><span class="hot">${STAR}</span>`;
 
     const overlay = el('div', { id: 'rwO' });
     overlay.setAttribute('role', 'dialog');
@@ -580,11 +604,11 @@
 
     overlay.innerHTML = `
       <header class="hd">
-        <img src="${SETTINGS.logo}" alt="The Rawan" class="logo-main">
+        <img src="${SETTINGS.logo}" alt="The Rawan" class="logo-main" decoding="async">
         <i aria-hidden="true"></i>
-        <img src="${SETTINGS.partnerLogo}" alt="Partner" class="logo-partner">
+        <img src="${SETTINGS.partnerLogo}" alt="Mitsui Fudosan Group" class="logo-partner" decoding="async">
         <i aria-hidden="true"></i>
-        <img src="${SETTINGS.developerLogo}" alt="Arthaland" class="logo-dev mono">
+        <img src="${SETTINGS.developerLogo}" alt="Arthaland" class="logo-dev mono" decoding="async">
       </header>
 
       <div class="mid">
@@ -612,10 +636,10 @@
     const stopFitting = fitToScreen(overlay);
     const startBtn = overlay.querySelector('.go');
 
-    play(overlay, [{ opacity: 0 }, { opacity: 1 }], { duration: 600, easing: 'ease-out' });
+    enter(overlay, [{ opacity: 0 }, { opacity: 1 }], { duration: 600, easing: 'ease-out' });
     [overlay.querySelector('.hd'), overlay.querySelector('.ey'), ...overlay.querySelectorAll('.card'), overlay.querySelector('.act')]
       .forEach((node, i) => rise(node, 16, 800, 150 + i * 90));
-    play(overlay.querySelector('.sep'), [{ opacity: 0, transform: 'scale(.4)' }, { opacity: 1, transform: 'none' }],
+    enter(overlay.querySelector('.sep'), [{ opacity: 0, transform: 'scale(.4)' }, { opacity: 1, transform: 'none' }],
       { duration: 900, delay: 320, easing: LUXE_EASE });
 
     if (!touch) setTimeout(() => startBtn.focus({ preventScroll: true }), 350);
@@ -655,6 +679,7 @@
   /* 6. Build Landing Page -------------------------------------------------- */
 
   let mounted = false;
+  let onboarded = false;
 
   function mount() {
     if (mounted || !doc.body) return;
@@ -662,6 +687,19 @@
 
     loadFonts();
     doc.head.appendChild(el('style', { textContent: CSS }));
+    showLanding(false);
+
+    /* "Home" in the side menu (Script 1) brings the landing page back */
+    doc.addEventListener('rw:home', (e) => {
+      e.preventDefault();
+      showLanding(true);
+    });
+  }
+
+  /* again = shown from the Home menu item: the visitor is already in the tour,
+     so the button gets focus and the onboarding screen is not repeated. */
+  function showLanding(again) {
+    if (doc.getElementById('rwS')) return;
 
     const page = el('div', { id: 'rwS' });
     page.setAttribute('role', 'dialog');
@@ -719,6 +757,11 @@
 
     page.append(beam, patternBg, stage, el('div', { className: 'floor' }), bar, noteL, noteR, word);
     doc.body.appendChild(page);
+    if (again) button.focus({ preventScroll: true });
+
+    /* The beam stays visible while the photo loads, so fade it in now rather than
+       hiding it again when the intro starts. */
+    enter(beam, [{ opacity: 0 }, { opacity: 1 }], { duration: 2400, easing: 'ease-out' });
 
     /* Fit the wordmark to the available width, but never taller than WORD_MAX_VH of the screen
        (landscape only). Then publish the bar and wordmark heights so the notes can avoid them. */
@@ -746,19 +789,18 @@
       fitWord();
       page.classList.remove('wait');
 
-      play(beam, [{ opacity: 0 }, { opacity: 1 }], { duration: 2400, easing: 'ease-out' });
-      play(patternBg, [{ opacity: 0 }, { opacity: 1 }], { duration: 2400, delay: 200, easing: 'ease-out' });
-      play(stage, [{ opacity: 0, scale: '.95' }, { opacity: 1, scale: '1' }], { duration: 2200, delay: 150, easing: LUXE_EASE });
-      play(photo, [{ opacity: 0, scale: '1.2' }, { opacity: 1, scale: '1' }],
+      enter(patternBg, [{ opacity: 0 }, { opacity: 1 }], { duration: 2400, delay: 200, easing: 'ease-out' });
+      enter(stage, [{ opacity: 0, scale: '.95' }, { opacity: 1, scale: '1' }], { duration: 2200, delay: 150, easing: LUXE_EASE });
+      enter(photo, [{ opacity: 0, scale: '1.2' }, { opacity: 1, scale: '1' }],
         { duration: 3000, delay: 350, easing: LUXE_EASE });
       if (!REDUCED_MOTION) {
-        play(glint, [{ transform: 'translateX(-120%)' }, { transform: 'translateX(120%)' }],
+        enter(glint, [{ transform: 'translateX(-120%)' }, { transform: 'translateX(120%)' }],
           { duration: 1800, delay: 2100, easing: 'cubic-bezier(.45, 0, .2, 1)' });
       }
 
       rise(bar, -10, 900, 300);
       h1.querySelectorAll('span').forEach((s, i) => {
-        play(s, [{ opacity: 0, transform: 'translateY(60%)' }, { opacity: 1, transform: 'none' }],
+        enter(s, [{ opacity: 0, transform: 'translateY(60%)' }, { opacity: 1, transform: 'none' }],
           { duration: 1400, delay: 600 + i * 140, easing: LUXE_EASE });
       });
       rise(noteL, 16, 1000, 1100);
@@ -767,7 +809,12 @@
 
     const decoded = photo.decode ? photo.decode() : Promise.resolve();
     let started = false;
-    const go = () => { if (!started) { started = true; startIntro(); } };
+    let leaving = false;
+    const go = () => {
+      if (started || leaving) return;
+      started = true;
+      startIntro();
+    };
     Promise.race([decoded.catch(() => {}), new Promise((r) => setTimeout(r, 2500))])
       .then(() => {
         requestAnimationFrame(() => requestAnimationFrame(go));
@@ -777,7 +824,6 @@
 
     /* 8. Transition Landing → Onboarding ----------------------------------- */
 
-    let leaving = false;
     function enterTour() {
       if (leaving) return;
       leaving = true;
@@ -786,7 +832,10 @@
       const EXIT = 'cubic-bezier(.7, 0, .84, 0)';
       play(word, [{ opacity: 1, translate: '0 0' }, { opacity: 0, translate: '0 30px' }], { duration: 500, easing: EXIT });
       play(stage, [{ opacity: 1, scale: '1' }, { opacity: 0, scale: '1.25' }], { duration: 800, easing: EXIT });
-      mountOnboarding();
+      if (!onboarded) {
+        onboarded = true;
+        mountOnboarding();
+      }
       const fade = play(page, [{ opacity: 1 }, { opacity: 0 }], { duration: 700, delay: 100, easing: 'ease-in' });
       const finish = () => { stopFitting(); page.remove(); };
       if (fade) fade.onfinish = finish;
