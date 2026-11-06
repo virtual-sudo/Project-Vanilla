@@ -343,15 +343,21 @@
 
     /* ── Onboarding ──────────────────────────────────────────────────── */
     #rwO {
+      /* Width of the header line and the cards. Shared, so their edges always line up. */
+      --content-w: min(clamp(1180px, calc(83.4 * var(--vw, 1vw)), 1600px), 100%);
+      /* Distance from the screen edge to the thin gold frame */
+      --frame: clamp(12px, calc(1.6 * var(--vw, 1vw)), 32px);
+
       position: fixed; inset: 0; z-index: 2147483647;
       display: grid; grid-template-rows: auto 1fr;
-      padding: max(32px, env(safe-area-inset-top, 0px)) var(--pad) max(32px, env(safe-area-inset-bottom, 0px));
+      padding: max(32px, env(safe-area-inset-top, 0px)) var(--pad) max(var(--frame), env(safe-area-inset-bottom, 0px));
       overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
+      scrollbar-gutter: stable both-edges; /* a visible scrollbar cannot push the content off-centre */
       color: var(--cream); font: 400 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased;
       background: radial-gradient(90% 80% at 50% 45%, #2C2F4B 0%, var(--navy) 45%, var(--navy-deep) 100%);
     }
     #rwO::after {
-      content: ""; position: fixed; inset: clamp(12px, calc(1.6 * var(--vw, 1vw)), 32px); z-index: -1; pointer-events: none;
+      content: ""; position: fixed; inset: var(--frame); z-index: -1; pointer-events: none;
       border: 1px solid rgba(201, 174, 114, .22);
       box-shadow: 0 0 0 100vmax rgba(8, 9, 18, .28), inset 0 0 160px rgba(8, 9, 18, .45);
     }
@@ -366,9 +372,8 @@
     #rwO .hd {
       display: flex; align-items: center; justify-content: center; gap: clamp(24px, calc(5.5 * var(--vw, 1vw)), 96px); flex-wrap: wrap;
       padding: clamp(12px, calc(2.5 * var(--vh, 1vh)), 32px) 0 clamp(20px, calc(3.5 * var(--vh, 1vh)), 48px); border-bottom: 1px solid var(--hairline);
-      width: min(1180px, 100%); margin: 0 auto;
+      width: var(--content-w); margin: 0 auto;
     }
-    @media (min-width: 1920px) { #rwO .hd { width: min(1600px, 100%); } #rwO .mid { width: min(1500px, 100%); } }
     #rwO .hd img { width: auto; object-fit: contain; }
     #rwO .hd img.logo-main { height: max(clamp(56px, calc(6.8 * var(--vw, 1vw)), 88px), calc(4.6 * var(--vw, 1vw))); }
     #rwO .hd img.logo-dev { height: max(clamp(50px, calc(6 * var(--vw, 1vw)), 80px), calc(4.2 * var(--vw, 1vw))); }
@@ -378,13 +383,14 @@
 
     #rwO .mid {
       align-self: center; display: flex; flex-direction: column; align-items: center;
-      gap: clamp(28px, calc(5 * var(--vh, 1vh)), 72px); width: min(1080px, 100%); margin: 0 auto; padding: clamp(20px, calc(4 * var(--vh, 1vh)), 48px) 0;
+      gap: clamp(28px, calc(5 * var(--vh, 1vh)), 72px); width: var(--content-w); margin: 0 auto; padding: clamp(20px, calc(4 * var(--vh, 1vh)), 48px) 0;
     }
     #rwO .ey {
       display: flex; align-items: center; gap: 18px;
       font: 500 max(13px, calc(.9 * var(--vw, 1vw)))/1.5 var(--sans); letter-spacing: .32em; text-transform: uppercase; color: var(--gold-light);
     }
     #rwO .ey::before, #rwO .ey::after { content: ""; width: clamp(40px, calc(4 * var(--vw, 1vw)), 96px); height: 1px; background: var(--rule); }
+    #rwO .ey::after { margin-left: -.32em; } /* cancels the letter-spacing after the last letter, so the text sits centred between its lines */
 
     #rwO .cols {
       display: grid; grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
@@ -410,18 +416,29 @@
     @media (hover: hover) and (pointer: fine) {
       #rwO .card:hover { border-color: rgba(201, 174, 114, 0.4); transform: translateY(-3px); }
     }
-    #rwO .ico { display: flex; align-items: center; justify-content: center; gap: 28px; height: 72px; margin-bottom: 24px; }
+    /* Two equal slots around the divider, so the divider sits exactly on the card's centre line.
+       86px is the width of the arrow keys, the widest icon. */
+    #rwO .ico {
+      display: grid; grid-template-columns: 86px 1px 86px; justify-items: center; align-items: center;
+      gap: 28px; height: 72px; margin-bottom: 24px;
+    }
     #rwO .ico > i { width: 1px; height: 32px; background: var(--hairline); }
     @media (min-width: 2200px) { #rwO:not(.m) .ico { zoom: 1.4; } }
     @media (min-width: 3200px) { #rwO:not(.m) .ico { zoom: 1.9; } }
     @media (min-width: 900px) { #rwO.m .ico { zoom: 1.5; } }
     #rwO h2 {
       margin-bottom: .45em;
+      padding-left: .08em; /* balances the letter-spacing after the last letter */
       font: 400 clamp(26px, calc(2.8 * var(--vw, 1vw)), 64px)/1.1 var(--serif); letter-spacing: .08em; text-transform: uppercase;
       background: linear-gradient(180deg, var(--gold-light), var(--gold) 70%, #B39255);
       -webkit-background-clip: text; background-clip: text; color: transparent;
     }
-    #rwO .card p { max-width: 26em; font-size: clamp(15px, calc(1.15 * var(--vw, 1vw)), 24px); line-height: 1.65; color: var(--text-soft); font-weight: 300; }
+    /* margin-block: auto centres the shorter text against the longer one in the other card,
+       while the icons and titles stay level with each other. */
+    #rwO .card p {
+      max-width: 26em; margin-block: auto; text-wrap: balance;
+      font-size: clamp(15px, calc(1.15 * var(--vw, 1vw)), 24px); line-height: 1.65; color: var(--text-soft); font-weight: 300;
+    }
 
     #rwO .act { display: flex; flex-direction: column; align-items: center; gap: 18px; margin-top: 8px; }
     #rwO .go {
@@ -465,30 +482,29 @@
     @keyframes rwO-ripple { from { transform: scale(1); opacity: .8; } to { transform: scale(1.9); opacity: 0; } }
 
     /* Onboarding: short landscape - everything tighter so it fits without scrolling where possible */
-    #rwO.short { padding-top: 14px; padding-bottom: 14px; }
-    #rwO.short::after { inset: 8px; }
+    #rwO.short { --frame: 8px; padding-top: 14px; }
     #rwO.short .hd { gap: 20px; padding: 4px 0 10px; }
     #rwO.short .hd img.logo-main { height: 34px; }
     #rwO.short .hd img.logo-dev { height: 30px; }
     #rwO.short .hd img.logo-partner { height: 24px; }
     #rwO.short .hd i { height: 18px; }
-    #rwO.short .mid { gap: 12px; padding: 10px 0 0; }
+    #rwO.short .mid { gap: 12px; padding: 10px 0; }
     #rwO.short .ey { font-size: 11px; }
     #rwO.short .card { padding: 14px 16px; }
-    #rwO.short .ico { height: 40px; margin-bottom: 8px; zoom: .8; }
+    #rwO.short .ico { height: 56px; margin-bottom: 8px; zoom: .8; }
     #rwO.short h2 { font-size: 20px; margin-bottom: 4px; }
     #rwO.short .card p { font-size: 13px; line-height: 1.45; }
     #rwO.short .act { gap: 0; margin-top: 0; }
     #rwO.short .go { height: 44px; padding: 0 28px; font-size: 12px; }
 
     /* Onboarding: portrait, any size */
-    #rwO.m { --pad: clamp(20px, calc(6 * var(--vw, 1vw)), 72px); }
+    #rwO.m { --pad: clamp(20px, calc(6 * var(--vw, 1vw)), 72px); --content-w: min(960px, 100%); }
     #rwO.m .hd { gap: clamp(16px, calc(4 * var(--vw, 1vw)), 48px); }
     #rwO.m .hd img.logo-main { height: clamp(36px, calc(8 * var(--vw, 1vw)), 96px); }
     #rwO.m .hd img.logo-dev { height: clamp(32px, calc(7 * var(--vw, 1vw)), 84px); }
     #rwO.m .hd img.logo-partner { height: clamp(24px, calc(5.4 * var(--vw, 1vw)), 64px); }
     #rwO.m .hd i { height: clamp(18px, calc(4 * var(--vw, 1vw)), 44px); }
-    #rwO.m .mid { gap: clamp(24px, calc(5 * var(--vw, 1vw)), 56px); padding: clamp(20px, calc(4 * var(--vw, 1vw)), 48px) 0 8px; width: min(820px, 100%); }
+    #rwO.m .mid { gap: clamp(24px, calc(5 * var(--vw, 1vw)), 56px); padding: clamp(20px, calc(4 * var(--vw, 1vw)), 48px) 0; }
     #rwO.m .ey { font-size: clamp(11px, calc(2.2 * var(--vw, 1vw)), 18px); }
     #rwO.m .cols { grid-template-columns: 1fr; gap: clamp(16px, calc(3 * var(--vw, 1vw)), 32px); }
     #rwO.m .sep {
@@ -501,7 +517,7 @@
     #rwO.m h2 { font-size: clamp(24px, calc(5.4 * var(--vw, 1vw)), 56px); }
     #rwO.m .card p { font-size: clamp(15px, calc(3 * var(--vw, 1vw)), 26px); }
     #rwO.m .act { width: 100%; }
-    #rwO.m .go { width: 100%; justify-content: space-between; }
+    #rwO.m .go { width: 100%; justify-content: center; padding: 0 20px; }
   `;
 
 
