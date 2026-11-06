@@ -17,7 +17,7 @@
 
    HOW THE SIDE MENU WORKS
      One class on the root, #rw.sidebar-open, drives everything: the menu
-     slides, the dock makes room and the tab arrow flips. To change how any
+     slides and the tab arrow flips. The dock stays fixed at the bottom. To change how any
      of them look when open, search for "sidebar-open" in SECTION 3.
 
    3DVISTA RULES
@@ -168,7 +168,7 @@
       --ease: cubic-bezier(.23, 1, .32, 1);
       --ease-drawer: cubic-bezier(.32, .72, 0, 1);
 
-      /* How the side menu moves. The dock uses the same value so they travel together. */
+      /* How the side menu moves. */
       --slide: .28s var(--ease);
 
       --safe-top: env(safe-area-inset-top, 0px);
@@ -365,7 +365,7 @@
     #rw-sidebar-body .rw-credit svg { width: 8px; flex: none; color: var(--avocado); }
 
 
-    /* ---------- Bottom dock: stays centred in the space beside the side menu ---------- */
+    /* ---------- Bottom dock: stays centred at the bottom of the screen ---------- */
     #rw-dock {
       --pill-h: 46px;
       --dock-gap: 18px;
@@ -373,12 +373,11 @@
       bottom: calc(var(--dock-gap) + var(--safe-bottom));
       padding: 0 var(--dock-gap);
       display: flex; justify-content: center;
-      transition: left var(--slide), transform .5s var(--ease-drawer), opacity .35s ease .1s, visibility 0s;
+      transition: transform .5s var(--ease-drawer), opacity .35s ease .1s, visibility 0s;
     }
-    #rw.sidebar-open #rw-dock { left: var(--sidebar-w); }
     #rw-dock.is-hidden {
       opacity: 0; visibility: hidden; transform: translateY(32px);
-      transition: left var(--slide), transform .35s var(--ease), opacity .2s ease, visibility 0s .35s;
+      transition: transform .35s var(--ease), opacity .2s ease, visibility 0s .35s;
     }
 
     #rw-dock .rw-strip {
@@ -477,9 +476,7 @@
     #rw.is-short #rw-menu button + button { margin-top: 4px; }
     #rw.is-short #rw-menu button svg { width: 26px; height: 26px; }
 
-    /* Narrow phones: no room beside the menu, so the dock floats over its bottom edge
-       and the credit lifts up to stay readable above it */
-    #rw.is-narrow.sidebar-open #rw-dock { left: 0; }
+    /* Narrow phones: the dock overlays the menu's bottom edge, so lift the credit above it. */
     #rw.is-narrow #rw-sidebar-body .rw-credit { padding-bottom: calc(80px + var(--safe-bottom)); }
 
 
