@@ -14,7 +14,8 @@
 
    NOTE: 3DVista injects this script as an escaped string, which strips
    every backslash and every line break. Never use backslashes anywhere in
-   this file, and end every statement with a semicolon.
+   this file, end every statement with a semicolon, and only use slash-star
+   comments (a double-slash comment would swallow the rest of the file).
    ========================================================================== */
 (function () {
   'use strict';
@@ -64,9 +65,19 @@
   const LUXE_EASE = 'cubic-bezier(.16, 1, .3, 1)';
 
   /* Layout thresholds (CSS px, after 3DVista's phone zoom is undone) */
-  const SHORT_HEIGHT = 560;        // landscape screens shorter than this use the compact layout
-  const WORD_MAX_VH = 0.18;        // the wordmark never gets taller than 18% of the screen height
-  const WORD_MAX_PX = 140;          // keeps the wordmark balanced on large displays
+  const SHORT_HEIGHT = 560;        /* landscape screens shorter than this use the compact layout */
+  const WORD_MAX_VH = 0.18;        /* the wordmark never gets taller than 18% of the screen height */
+  const WORD_MAX_PX = 140;         /* keeps the wordmark balanced on large displays */
+
+  /* The intro and the "Enter the tour" transition are one camera move, played in two halves.
+     Intro: the petals settle in like an aperture closing onto the view, and the words rise into place.
+     Exit: the words lift away, the photo in the star melts into the live panorama, then the whole
+     page - background, petals and all - flies through the star at full strength. Nothing fades:
+     the panorama is revealed only because the opening grows until it covers the screen. How far to
+     fly is worked out from the screen size, so it ends at the right moment on any screen.
+     The onboarding waits until the panorama fills the screen, so it never covers the flight. */
+  const EXIT_MS = 2200;            /* length of the flight through the star (longer = slower and more cinematic) */
+  const ONBOARD_OVERLAP = 150;     /* the onboarding starts fading in this many ms before the flight is done */
 
 
   /* 2. Graphics & Icons --------------------------------------------------- */
@@ -78,6 +89,10 @@
     'A500 500 0 0 1 1000 500A500 500 0 0 1 500 0Z';
   const STAR_MASK = svgUrl(
     `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 1000' preserveAspectRatio='none'><path d='${WINDOW_PATH}'/></svg>`);
+
+  /* The star is a square with a quarter circle cut from each corner. The widest circle that fits
+     inside it has a radius of 0.207 of the star's size (half the diagonal minus the cut). */
+  const STAR_INNER_RADIUS = Math.SQRT2 / 2 - 0.5;
 
   const PETAL_PATHS = [
     'M500 0H330A540 540 0 0 1 0 500A500 500 0 0 0 500 0Z',
@@ -187,6 +202,16 @@
     #rwS::after {
       content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
       background: radial-gradient(120% 100% at 50% 45%, transparent 55%, rgba(8, 9, 18, .55) 100%);
+    }
+
+    /* While entering the tour, the star is cut out of the whole page so the live panorama shows
+       through it. enterTour() sets --hole-x, --hole-y and --hole-size to where the star is. */
+    #rwS.opening {
+      -webkit-mask: linear-gradient(#000 0 0), ${STAR_MASK} var(--hole-x) var(--hole-y) / var(--hole-size) var(--hole-size) no-repeat;
+      -webkit-mask-composite: xor;
+              mask: linear-gradient(#000 0 0), ${STAR_MASK} var(--hole-x) var(--hole-y) / var(--hole-size) var(--hole-size) no-repeat;
+              mask-composite: exclude;
+      will-change: transform;
     }
 
     #rwS .beam {
@@ -343,6 +368,12 @@
 
     /* ── Onboarding ──────────────────────────────────────────────────── */
     #rwO {
+      /* How see-through the screen is. 0 = fully clear, 1 = solid. Lower it to show more of the
+         panorama behind, raise it if the text gets hard to read over a bright scene. */
+      --veil: .74;
+      /* Softness of the panorama behind the screen (0px = sharp) */
+      --soften: 3px;
+
       /* Width of the header line and the cards. Shared, so their edges always line up.
          This is the main dial for how big the cards are: lower 1040px and 1240px for smaller cards.
          The 45 only takes over on very large displays, past about 2750px wide. */
@@ -356,18 +387,22 @@
       overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
       scrollbar-gutter: stable both-edges; /* a visible scrollbar cannot push the content off-centre */
       color: var(--cream); font: 400 16px/1.6 var(--sans); -webkit-font-smoothing: antialiased;
-      background: radial-gradient(90% 80% at 50% 45%, #2C2F4B 0%, var(--navy) 45%, var(--navy-deep) 100%);
+      background: radial-gradient(90% 80% at 50% 45%,
+        rgba(44, 47, 75, calc(var(--veil) - .08)) 0%,
+        rgba(31, 33, 51, var(--veil)) 45%,
+        rgba(18, 20, 34, calc(var(--veil) + .14)) 100%);
+      -webkit-backdrop-filter: blur(var(--soften));
+              backdrop-filter: blur(var(--soften));
     }
     #rwO::after {
       content: ""; position: fixed; inset: var(--frame); z-index: -1; pointer-events: none;
       border: 1px solid rgba(201, 174, 114, .22);
-      box-shadow: 0 0 0 100vmax rgba(8, 9, 18, .28), inset 0 0 160px rgba(8, 9, 18, .45);
+      box-shadow: 0 0 0 100vmax rgba(8, 9, 18, .1), inset 0 0 160px rgba(8, 9, 18, .28);
     }
+    /* A soft warm glow in the top right corner. No line pattern on this screen. */
     #rwO::before {
       content: ""; position: fixed; inset: 0; z-index: -2; pointer-events: none;
-      background:
-        radial-gradient(55% 70% at 92% 4%, rgba(214, 186, 120, .22), transparent 62%),
-        var(--pattern);
+      background: radial-gradient(55% 70% at 92% 4%, rgba(214, 186, 120, .22), transparent 62%);
       -webkit-mask-image: radial-gradient(circle at 50% 50%, #000 35%, transparent 80%);
               mask-image: radial-gradient(circle at 50% 50%, #000 35%, transparent 80%);
     }
@@ -390,6 +425,7 @@
     #rwO .ey {
       display: flex; align-items: center; gap: 18px;
       font: 500 max(13px, calc(.9 * var(--vw, 1vw)))/1.5 var(--sans); letter-spacing: .32em; text-transform: uppercase; color: var(--gold-light);
+      text-shadow: 0 1px 12px rgba(8, 9, 18, .6);
     }
     #rwO .ey::before, #rwO .ey::after { content: ""; width: clamp(40px, calc(4 * var(--vw, 1vw)), 96px); height: 1px; background: var(--rule); }
     #rwO .ey::after { margin-left: -.32em; } /* cancels the letter-spacing after the last letter, so the text sits centred between its lines */
@@ -410,8 +446,10 @@
       display: flex; flex-direction: column; align-items: center; text-align: center;
       width: 100%; min-width: 0;
       padding: clamp(24px, calc(3 * var(--vw, 1vw)), 48px) clamp(20px, calc(2.6 * var(--vw, 1vw)), 44px);
-      background: rgba(255, 255, 255, 0.025);
-      border: 1px solid rgba(201, 174, 114, 0.18);
+      background: rgba(14, 15, 28, .34);
+      -webkit-backdrop-filter: blur(8px);
+              backdrop-filter: blur(8px);
+      border: 1px solid rgba(201, 174, 114, 0.22);
       border-radius: 12px;
       transition: border-color .3s ease, transform .3s var(--ease-out);
     }
@@ -547,8 +585,11 @@
 
   const enter = (node, frames, options) => play(node, frames, Object.assign({ fill: 'backwards' }, options));
 
-  const rise = (node, distance, duration, delay) =>
-    enter(node, [{ opacity: 0, transform: `translateY(${distance}px)` }, { opacity: 1, transform: 'none' }],
+  /* Softer entrance for the onboarding: rises, un-blurs and fades in */
+  const reveal = (node, distance, duration, delay) =>
+    enter(node, [
+      { opacity: 0, transform: `translateY(${distance}px)`, filter: 'blur(8px)' },
+      { opacity: 1, transform: 'none', filter: 'blur(0px)' }],
       { duration, delay, easing: LUXE_EASE });
 
   /* How much the browser is shrinking the page. 3DVista asks for half size on phones
@@ -612,9 +653,11 @@
 
   /* 5. Onboarding Screen --------------------------------------------------- */
 
-  function mountOnboarding(onComplete) {
+  /* delay = how long to wait (ms) before the screen starts to fade in */
+  function mountOnboarding(onComplete, delay) {
     if (doc.getElementById('rwO')) return;
 
+    const wait = delay || 0;
     const touch = !FINE_POINTER;
     const key = (k) => `<span class="key ${k[0]}">${ICONS[k]}</span>`;
     /* Same icons on every device (only the wording changes for touch screens) */
@@ -660,15 +703,15 @@
     const stopFitting = fitToScreen(overlay);
     const startBtn = overlay.querySelector('.go');
 
-    enter(overlay, [{ opacity: 0 }, { opacity: 1 }], { duration: 600, easing: 'ease-out' });
+    enter(overlay, [{ opacity: 0 }, { opacity: 1 }], { duration: 1200, delay: wait, easing: 'ease-out' });
     [overlay.querySelector('.hd'), overlay.querySelector('.ey'), ...overlay.querySelectorAll('.card'), overlay.querySelector('.act')]
-      .forEach((node, i) => rise(node, 16, 800, 150 + i * 90));
+      .forEach((node, i) => reveal(node, 22, 1100, wait + 250 + i * 120));
     enter(overlay.querySelector('.sep'), [{ opacity: 0, transform: 'scale(.4)' }, { opacity: 1, transform: 'none' }],
-      { duration: 900, delay: 320, easing: LUXE_EASE });
+      { duration: 1000, delay: wait + 600, easing: LUXE_EASE });
 
-    if (!touch) setTimeout(() => startBtn.focus({ preventScroll: true }), 350);
+    if (!touch) setTimeout(() => startBtn.focus({ preventScroll: true }), wait + 350);
 
-    const readyAt = performance.now() + 700;
+    const readyAt = performance.now() + wait + 700;
     let leaving = false;
 
     function dismiss() {
@@ -751,10 +794,9 @@
     photo.src = SETTINGS.image;
     const glint = el('div', { className: 'glint' });
     win.append(photo, glint);
-    stage.append(
-      win,
-      el('div', { className: 'layer', innerHTML: PETALS }),
-      el('div', { className: 'layer petal-pattern' }));
+    const petalsLayer = el('div', { className: 'layer', innerHTML: PETALS });
+    const patternLayer = el('div', { className: 'layer petal-pattern' });
+    stage.append(win, petalsLayer, patternLayer);
 
     /* Left note: place & coordinates */
     const noteL = el('div', { className: 'note l' });
@@ -779,7 +821,8 @@
     });
     word.append(h1);
 
-    page.append(beam, patternBg, stage, el('div', { className: 'floor' }), bar, noteL, noteR, word);
+    const floor = el('div', { className: 'floor' });
+    page.append(beam, patternBg, stage, floor, bar, noteL, noteR, word);
     doc.body.appendChild(page);
     if (again) button.focus({ preventScroll: true });
 
@@ -809,26 +852,34 @@
 
     /* 7. Entrance Animations ----------------------------------------------- */
 
+    /* The first half of the camera move. The petals start a little closer and turned, then settle
+       into place like an aperture closing onto the view - the reverse of the exit. The photo eases
+       back inside the star, and the words rise out of their mask one by one. */
     function startIntro() {
       fitWord();
       page.classList.remove('wait');
 
-      enter(patternBg, [{ opacity: 0 }, { opacity: 1 }], { duration: 2400, delay: 200, easing: 'ease-out' });
-      enter(stage, [{ opacity: 0, scale: '.95' }, { opacity: 1, scale: '1' }], { duration: 2200, delay: 150, easing: LUXE_EASE });
+      enter(patternBg, [{ opacity: 0 }, { opacity: 1 }], { duration: 2600, delay: 200, easing: 'ease-out' });
+      enter(stage, [
+        { opacity: 0, scale: '1.16', rotate: '4deg' },
+        { opacity: 1, offset: .35 },                    /* solid early; the settling carries on after */
+        { opacity: 1, scale: '1', rotate: '0deg' },
+      ], { duration: 2600, delay: 100, easing: LUXE_EASE });
       enter(photo, [{ opacity: 0, scale: '1.2' }, { opacity: 1, scale: '1' }],
-        { duration: 3000, delay: 350, easing: LUXE_EASE });
+        { duration: 3200, delay: 250, easing: LUXE_EASE });
       if (!REDUCED_MOTION) {
         enter(glint, [{ transform: 'translateX(-120%)' }, { transform: 'translateX(120%)' }],
-          { duration: 1800, delay: 2100, easing: 'cubic-bezier(.45, 0, .2, 1)' });
+          { duration: 1800, delay: 2600, easing: 'cubic-bezier(.45, 0, .2, 1)' });
       }
 
-      rise(bar, -10, 900, 300);
+      reveal(bar, -10, 1000, 450);
+      /* The words rise out of the wordmark's mask: no fade, so the letters stay crisp */
       h1.querySelectorAll('span').forEach((s, i) => {
-        enter(s, [{ opacity: 0, transform: 'translateY(60%)' }, { opacity: 1, transform: 'none' }],
-          { duration: 1400, delay: 600 + i * 140, easing: LUXE_EASE });
+        enter(s, [{ transform: 'translateY(105%)' }, { transform: 'none' }],
+          { duration: 1500, delay: 750 + i * 120, easing: LUXE_EASE });
       });
-      rise(noteL, 16, 1000, 1100);
-      rise(noteR, 16, 1000, 1250);
+      reveal(noteL, 16, 1100, 1200);
+      reveal(noteR, 16, 1100, 1350);
     }
 
     const decoded = photo.decode ? photo.decode() : Promise.resolve();
@@ -846,24 +897,114 @@
       });
 
 
-    /* 8. Transition Landing → Onboarding ----------------------------------- */
+    /* 8. Transition Landing → Panorama → Onboarding ------------------------ */
 
+    /* Cuts the star out of the page, so the live panorama shows through it, and returns where
+       the star is in the page's own pixels (3DVista's phone zoom makes those differ from the screen's). */
+    function cutOutStar() {
+      const unit = parseFloat(page.style.zoom) || 1;
+      const pageBox = page.getBoundingClientRect();
+      const starBox = win.getBoundingClientRect();
+      const hole = {
+        x: (starBox.left - pageBox.left) / unit,
+        y: (starBox.top - pageBox.top) / unit,
+        size: starBox.width / unit,
+        pageW: pageBox.width / unit,
+        pageH: pageBox.height / unit,
+      };
+      page.style.setProperty('--hole-x', hole.x + 'px');
+      page.style.setProperty('--hole-y', hole.y + 'px');
+      page.style.setProperty('--hole-size', hole.size + 'px');
+      page.style.transformOrigin = (hole.x + hole.size / 2) + 'px ' + (hole.y + hole.size / 2) + 'px';
+      page.classList.add('opening');
+      return hole;
+    }
+
+    /* How far the page must zoom before the star opening covers the whole screen:
+       its widest inner circle has to reach the screen corner furthest from its centre. */
+    function zoomToFill(hole) {
+      const cx = hole.x + hole.size / 2;
+      const cy = hole.y + hole.size / 2;
+      const furthest = Math.max(
+        Math.hypot(cx, cy), Math.hypot(hole.pageW - cx, cy),
+        Math.hypot(cx, hole.pageH - cy), Math.hypot(hole.pageW - cx, hole.pageH - cy));
+      return furthest / (STAR_INNER_RADIUS * hole.size);
+    }
+
+    /* The flight's pace: slow to start, fastest in the middle, gentle at the end (ease-in-out cubic),
+       and its inverse - for a point along the way, when the flight gets there. */
+    const glide = (t) => (t < .5 ? 4 * t * t * t : 1 - Math.pow(2 - 2 * t, 3) / 2);
+    const glideTimeAt = (e) => (e < .5 ? Math.cbrt(e / 4) : 1 - Math.cbrt(2 * (1 - e)) / 2);
+
+    function showOnboardingOnce(delay) {
+      if (onboarded) return;
+      onboarded = true;
+      mountOnboarding(null, delay);
+    }
+
+    /* The second half of the camera move, in three overlapping steps:
+       1. the words lift up out of their mask while the bar and notes drift away;
+       2. the photo inside the star eases forward and melts into the live panorama behind the page;
+       3. the page - background, petals and pattern together - flies towards the viewer through the
+          star at full strength, until the opening is bigger than the screen.
+       While the page is in flight only movement and fades of small parts run (no blur, nothing
+       added or removed), so the browser can keep it on the graphics card and it stays smooth. */
     function enterTour() {
       if (leaving) return;
       leaving = true;
       doc.removeEventListener('keydown', onKey);
+      page.style.overflow = 'hidden';         /* no scrollbars while the page flies past (portrait layout) */
 
-      const EXIT = 'cubic-bezier(.7, 0, .84, 0)';
-      play(word, [{ opacity: 1, translate: '0 0' }, { opacity: 0, translate: '0 30px' }], { duration: 500, easing: EXIT });
-      play(stage, [{ opacity: 1, scale: '1' }, { opacity: 0, scale: '1.25' }], { duration: 800, easing: EXIT });
-      if (!onboarded) {
-        onboarded = true;
-        mountOnboarding();
-      }
-      const fade = play(page, [{ opacity: 1 }, { opacity: 0 }], { duration: 700, delay: 100, easing: 'ease-in' });
       const finish = () => { stopFitting(); page.remove(); };
-      if (fade) fade.onfinish = finish;
-      else finish();
+
+      /* Reduced motion: no flight, just a short fade into the onboarding */
+      if (REDUCED_MOTION || !page.animate) {
+        showOnboardingOnce(0);
+        const fade = play(page, [{ opacity: 1 }, { opacity: 0 }], { duration: 400, easing: 'ease-out' });
+        if (fade) fade.onfinish = finish;
+        else finish();
+        return;
+      }
+
+      /* If the intro is still playing, jump it to the end so the star is in its final place */
+      page.getAnimations({ subtree: true })
+        .filter((a) => a.effect && a.effect.getComputedTiming().iterations !== Infinity)
+        .forEach((a) => a.finish());
+
+      const SOFT = 'cubic-bezier(.4, 0, .2, 1)';
+      const SLIDE = 'cubic-bezier(.7, 0, .3, 1)';
+      const FLIGHT_DELAY = 300;               /* gives the words a head start before the page moves */
+
+      /* 1 · details */
+      const drift = (node, delay) => play(node,
+        [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(-12px)' }],
+        { duration: 650, delay, easing: SOFT });
+      drift(bar, 0);
+      drift(noteL, 60);
+      drift(noteR, 120);
+      h1.querySelectorAll('span').forEach((w, i) => play(w,
+        [{ transform: 'none' }, { transform: 'translateY(-105%)' }],
+        { duration: 750, delay: i * 70, easing: SLIDE }));
+
+      /* 2 · the star opens: the photo eases forward and melts into the live panorama */
+      const hole = cutOutStar();
+      play(win, [{ opacity: 1, scale: '1' }, { opacity: 0, scale: '1.08' }], { duration: 700, delay: 60, easing: SOFT });
+
+      /* 3 · fly through. The flight goes 30% past the point where the screen is covered, and is
+         eased on a log scale so it feels like moving at a steady pace rather than ballooning. */
+      const fill = zoomToFill(hole);
+      const target = fill * 1.3;
+      const frames = [];
+      for (let i = 0; i <= 24; i++) {
+        const t = i / 24;
+        frames.push({ transform: `scale(${Math.pow(target, glide(t)).toFixed(4)})`, offset: t });
+      }
+      const flight = page.animate(frames, { duration: EXIT_MS, delay: FLIGHT_DELAY, easing: 'linear', fill: 'both' });
+      flight.onfinish = finish;
+
+      /* The onboarding starts fading in just as the opening covers the screen */
+      const coveredAt = FLIGHT_DELAY + glideTimeAt(Math.log(fill) / Math.log(target)) * EXIT_MS;
+      showOnboardingOnce(Math.max(0, Math.round(coveredAt - ONBOARD_OVERLAP)));
     }
 
     function onKey(e) {
