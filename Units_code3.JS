@@ -1,16 +1,21 @@
 /* =====================================================================
-   THE RAWAN | Script 3: Side menu panels (Rawan Estate + Kayen)
-   Fills the panel inside the side menu that navigation.js builds.
+   THE RAWAN | Script 3: Side menu panels (About + Residences)
+   Fills a content panel that opens beside the menu rail (code1.js builds the rail).
+   Scene navigation is no longer here: the multi-layer menu in code1.js
+   lists the scenes as text rows.
 
    FILE MAP (search for the section name to jump there)
      SECTION 1  Content: text, images, units   <-- most edits happen here
      SECTION 2  Styles
      SECTION 3  Small helpers
-     SECTION 4  Rawan Estate panel
-     SECTION 5  Kayen panel
+     SECTION 4  About panel
+     SECTION 5  Residences panel
      SECTION 6  Connect to the side menu
 
-   Colours and fonts such as var(--gold) come from the top of SECTION 3 in navigation.js.
+   To show a panel, give a section in MENU (code1.js) panel: 'overview' or panel: 'units'.
+   It then opens beside the rail, like the scene lists do.
+
+   Colours and fonts such as var(--gold) come from the top of SECTION 3 in code1.js.
 
    3DVISTA RULES
      3DVista injects this file as an escaped string, which strips every
@@ -33,7 +38,7 @@
        A unit's own href wins over this. Leave empty to do nothing. */
     inquireUrl: '',
 
-    /* "Rawan Estate" in the side menu */
+    /* "About" panel (panel: 'overview') */
     overview: {
       image: IMG + 'bg.png',
       imageLabel: 'Entrance',
@@ -60,7 +65,7 @@
       }
     },
 
-    /* "Kayen" in the side menu. Add a photo by filling in image, like the gallery above. */
+    /* "Residences" panel (panel: 'units') */
     units: [
       { name: 'Studio',    size: 'Size to be confirmed', image: '', href: '' },
       { name: '1 Bedroom', size: 'Size to be confirmed', image: '', href: '' },
@@ -98,8 +103,8 @@
     #rw-panel::-webkit-scrollbar-thumb:hover { background: rgba(248, 247, 242, .35); }
 
     /* Everything in a panel fades up, one item after another */
-    #rw-panel > * { animation: rw-fade-up .5s var(--ease) both; }
-    @keyframes rw-fade-up { from { opacity: 0; transform: translateY(8px); } }
+    #rw-panel > * { animation: rw-fade-up .8s var(--ease) backwards; }
+    @keyframes rw-fade-up { from { opacity: 0; transform: translateY(16px) scale(.985); } }
     @keyframes rw-fade { from { opacity: 0; } }
 
 
@@ -122,7 +127,7 @@
     #rw-panel .rw-image img {
       position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
       opacity: 0;
-      transition: opacity .5s ease, transform .8s var(--ease);
+      transition: opacity .7s ease, transform 1.2s var(--ease);
     }
     #rw-panel .rw-image img.is-loaded { opacity: 1; }
 
@@ -133,7 +138,7 @@
     #rw-panel .rw-placeholder svg { width: 24px; opacity: .7; }
 
 
-    /* ---------- Rawan Estate panel ---------- */
+    /* ---------- About panel ---------- */
     #rw-panel .rw-intro { margin: 16px 0 4px; font-size: 14px; font-weight: 300; line-height: 1.7; }
 
     #rw-panel .rw-pillar { display: flex; gap: 14px; padding: 14px 0; border-top: 1px solid var(--line-faint); }
@@ -165,22 +170,19 @@
     #rw-panel .rw-btn-orange:active { transform: scale(.98); background: var(--peach); }
 
 
-    /* ---------- Kayen panel ---------- */
+    /* ---------- Residences cards ---------- */
     #rw-panel .rw-unit {
       position: relative; padding: 16px; border-radius: 10px;
       background: rgba(255, 255, 255, .02);
       border: 1px solid var(--line-faint);
       cursor: pointer;
-      transition: background-color .25s ease, border-color .25s ease, transform .16s ease;
+      transition: background-color .4s var(--ease), border-color .4s var(--ease), transform .5s var(--ease), box-shadow .5s var(--ease);
     }
     #rw-panel .rw-unit + .rw-unit { margin-top: 14px; }
     #rw-panel .rw-unit:active { transform: scale(.995); }
 
     #rw-panel .rw-unit-info { margin-top: 12px; }
-    #rw-panel .rw-unit-info small {
-      display: block; margin-bottom: 4px;
-      font-size: 10px; letter-spacing: .14em; opacity: .5; font-variant-numeric: tabular-nums;
-    }
+    #rw-panel .rw-unit-info h4 { font-size: 12px; letter-spacing: .12em; }
     #rw-panel .rw-unit-info p { margin-top: 4px; font-size: 12px; opacity: .7; }
 
 
@@ -191,7 +193,7 @@
         box-shadow: 0 10px 28px rgba(242, 131, 97, .38);
       }
       #rw-panel .rw-btn-orange:hover svg { transform: translateX(4px); }
-      #rw-panel .rw-unit:hover { background: rgba(192, 177, 119, .05); border-color: #C0B17760; }
+      #rw-panel .rw-unit:hover { background: rgba(192, 177, 119, .05); border-color: #C0B17760; transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0, 0, 0, .28); }
       #rw-panel .rw-unit:hover .rw-image img { transform: scale(1.03); }
     }
 
@@ -272,7 +274,7 @@
 
 
   /* =================================================================
-     SECTION 4. RAWAN ESTATE PANEL
+     SECTION 4. ABOUT PANEL
      ================================================================= */
   function pillarRow(pillar, i) {
     return el('div', 'rw-pillar', `
@@ -317,11 +319,9 @@
 
 
   /* =================================================================
-     SECTION 5. KAYEN PANEL
+     SECTION 5. RESIDENCES PANEL
      ================================================================= */
-  function unitCard(unit, i) {
-    const total = CONTENT.units.length;
-
+  function unitCard(unit) {
     const card = el('div', 'rw-unit');
     card.setAttribute('role', 'button');
     card.setAttribute('tabindex', '0');
@@ -329,7 +329,6 @@
 
     card.appendChild(imageFrame(unit.image, unit.name));
     card.appendChild(el('div', 'rw-unit-info', `
-      <small>${twoDigits(i)} / ${twoDigits(total - 1)}</small>
       <h4>${unit.name}</h4>
       <p>${unit.size}</p>
     `));
@@ -345,7 +344,7 @@
   }
 
   function renderUnits(container) {
-    CONTENT.units.forEach((unit, i) => container.appendChild(unitCard(unit, i)));
+    CONTENT.units.forEach((unit) => container.appendChild(unitCard(unit)));
   }
 
 
@@ -357,7 +356,10 @@
      To add a panel: write a render function, add it here, and add a row with
      the same key to MENU in navigation.js.
      ================================================================= */
-  const PANELS = { overview: renderOverview, units: renderUnits };
+  const PANELS = {
+    overview: renderOverview,
+    units: renderUnits
+  };
   const builtPanels = {};
   let stylesAdded = false;
 
@@ -375,7 +377,7 @@
 
     /* Each item starts its fade slightly after the one before */
     Array.from(holder.children).forEach((child, i) => {
-      child.style.animationDelay = (80 + Math.min(i * 45, 360)) + 'ms';
+      child.style.animationDelay = (100 + Math.min(i * 70, 560)) + 'ms';
     });
     return Array.from(holder.children);
   }
