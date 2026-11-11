@@ -1,24 +1,37 @@
 /* =====================================================================
    THE RAWAN | Script 1: Navigation
-   Top bar, side menu and bottom scene dock.
+   Icon rail on the left with menu layers beside it, the scene title in the
+   top right corner, and the scene dock along the bottom.
 
    FILE MAP (search for the section name to jump there)
-     SECTION 1   Settings: logo, scenes, menu items   <-- most edits happen here
+     SECTION 1   Settings: scenes and menu items   <-- most edits happen here
      SECTION 2   Icons and background pattern
      SECTION 3   Styles (colours and sizes are at the very top)
      SECTION 4   Small helpers
      SECTION 5   Build the page elements
-     SECTION 6   Side menu
-     SECTION 7   Fullscreen
+     SECTION 6   Side menu and its layers
+     SECTION 7   Staying visible in fullscreen
      SECTION 8   Bottom dock
      SECTION 9   Connect to 3DVista
      SECTION 10  Phone sizing
      SECTION 11  Start
 
-   HOW THE SIDE MENU WORKS
-     One class on the root, #rw.sidebar-open, drives everything: the menu
-     slides and the tab arrow flips. The dock stays fixed at the bottom. To change how any
-     of them look when open, search for "sidebar-open" in SECTION 3.
+   HOW THE MENU WORKS
+     The rail on the left shows every section as an icon with a small title under it.
+     A section with items opens them in a panel beside the rail (a layer). A row in
+     that panel can open another panel beside it, for as many layers as you need.
+     Phones have no room side by side, so there each deeper panel opens under the one before.
+     Clicking outside the menu, clicking the section again, or Escape closes the panels.
+     The logo sits at the top of the rail.
+     Hide All, under the last section, hides the title, menu and bottom dock. The logo
+     stays, settling into the top left corner, and a Show button waits at the middle of
+     the left edge to bring everything back.
+
+   HOW THE DOCK FOLLOWS THE MENU
+     Opening a panel makes the bottom dock show the same rows as pills (rows that
+     open another panel are left out). Rows still waiting for their panorama show
+     dimmed there too. A section with no items shows every scene. The dock hides
+     itself when it would only have one pill, or none, to show.
 
    3DVISTA RULES
      3DVista injects this file as an escaped string, which strips every
@@ -34,44 +47,89 @@
      SECTION 1. SETTINGS
      ================================================================= */
   const CONFIG = {
-    logo: 'https://raw.githubusercontent.com/virtual-sudo/The-Rawan-/main/Rawan%20Logo%20-%20Full%20Color_The%20Rawan%20Logo%20H%20-%20Gold.png',
+    /* Logo at the top of the rail. The PNG has empty space around the artwork, which
+       SECTION 3 crops away under "Logo" (update those numbers if the file changes). */
+    logo: 'https://raw.githubusercontent.com/virtual-sudo/Project-Vanilla/main/Rawan%20Logo%20-%20Full%20Color_The%20Rawan%20Logo%20H%20-%20Gold.png',
     logoText: 'The Rawan',
-    credit: 'A Prestige Green Development by ARTHALAND',
-    menuTitle: 'Menu',
-
-    /* true = the side menu starts open on desktop. Phones always start with it hidden. */
-    sidebarStartsOpen: true,
 
     /* Screen sizes in pixels */
     phoneMaxWidth: 760,    /* compact layout at or below this width */
-    shortMaxHeight: 500,   /* compact layout at or below this height (phones held sideways) */
-    narrowMaxWidth: 600    /* at or below this, the dock no longer fits beside the side menu */
+    shortMaxHeight: 500    /* compact layout at or below this height (phones held sideways) */
   };
 
-  /* Bottom dock. index = the panorama's position in the 3DVista main playlist, starting at 0. */
+  /* Every panorama, for the bottom dock. index = its position in the 3DVista main playlist, starting at 0. */
   const SCENES = [
-    { index: 0, title: 'EL NIDO' },
-    { index: 1, title: 'WATERFALL OASIS' },
+    { index: 0, title: 'EL NIDO AERIAL' },
+    { index: 1, title: 'WATERFALL OASIS AERIAL' },
     { index: 2, title: 'DROP OFF' },
     { index: 3, title: 'COMMUNITY COURT' },
     { index: 4, title: 'WATERFALL OASIS' },
     { index: 5, title: 'RIVERINE WALK' },
-    { index: 6, title: 'EL NIDO 2' },
+    { index: 6, title: 'EL NIDO' },
     { index: 7, title: 'LIMESTONE TERRACE' },
     { index: 8, title: 'PLAY CANYON' }
   ];
 
-  /* Side menu, in order. The first row starts highlighted.
-     - icon:  a name from MENU_ICONS in SECTION 2
-     - panel: opens that panel inside the side menu (the panels are written in cards.js)
-     - home:  brings the welcome page back
-     - href:  opens a link in a new tab
-     A row with none of these still highlights when clicked, but opens nothing yet. */
+  /* The menu, in order. The first section starts highlighted.
+     - label:  the small title under the icon, or the text of a row in a panel.
+               A scene row can leave it out to use its name from SCENES.
+     - icon:   a name from MENU_ICONS in SECTION 2 (rail only)
+     - items:  the rows of the panel it opens. They can have items of their own, for another layer:
+                 { label: 'Development Overview', items: [{ scene: 0 }, { scene: 6 }] }
+     - scene:  playlist index this row goes to
+     - goTo:   playlist index to open as soon as this row is clicked
+     - panel:  opens a content panel from cards.js beside the rail ('overview' or 'units')
+     - home:   brings the welcome page back
+     - href:   opens a link in a new tab
+     A panel row with none of these shows dimmed (in its panel and in the dock), because it is
+     waiting for its panorama. Give it a scene to bring it to life, for example { label: 'Lobby', scene: 9 }. */
   const MENU = [
-    { label: 'Masterplan', icon: 'masterplan' },
-    { label: 'Rawan Estate', icon: 'rawanEstate', panel: 'overview' },
-    { label: 'Kayen', icon: 'kayen', panel: 'units' },
-    { label: 'Amenities', icon: 'amenities' },
+    {
+      label: 'Masterplan',
+      icon: 'masterplan',
+      goTo: 0,
+      items: [
+        { scene: 0 },
+        { scene: 1 }
+      ]
+    },
+    {
+      label: 'Rawan Estate',
+      icon: 'rawanEstate',
+      items: [
+        { scene: 2 },
+        { scene: 3 },
+        { scene: 4 },
+        { scene: 5 },
+        { scene: 6 },
+        { scene: 7 },
+        { scene: 8 }
+      ]
+    },
+    {
+      label: 'Kayen',
+      icon: 'kayen',
+      items: [
+        {
+          label: 'Amenities',
+          items: [
+            { label: 'Drop-Off Area', scene: 2 },
+            { label: 'Lobby' },
+            { label: 'Restoration Hub' },
+            { label: 'Adult Pool' },
+            { label: 'Kid’s Pool' }
+          ]
+        },
+        {
+          label: 'Unit Offerings',
+          items: [
+            { label: 'Studio' },
+            { label: '1-Bedroom' },
+            { label: '2-Bedroom' }
+          ]
+        }
+      ]
+    },
     { label: 'Location', icon: 'location' }
   ];
 
@@ -96,13 +154,17 @@
   }
 
   const ICONS = {
-    fullscreen: lineIcon('<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>'),
-    exitFullscreen: lineIcon('<path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/>'),
     prev: lineIcon('<path d="M15 5l-7 7 7 7"/>'),
-    next: lineIcon('<path d="M9 5l7 7-7 7"/>')
+    next: lineIcon('<path d="M9 5l7 7-7 7"/>'),
+
+    /* Hide (closed eye) and Show (open eye). The closed eye sits low in its drawing,
+       so its viewBox starts 23 lower to centre it like the open eye. */
+    hide: `<svg viewBox="0 23 145 145" fill="currentColor" aria-hidden="true"><path d="M72.4841 105.706C49.5307 105.706 28.9934 93.0216 19.3288 72.4844H6.04004C16.3087 99.062 42.2822 117.787 72.4841 117.787C102.686 117.787 128.659 99.062 138.928 72.4844H125.639C115.975 93.0216 95.4374 105.706 72.4841 105.706Z"/></svg>`,
+    show: `<svg viewBox="0 0 164 164" fill="currentColor" aria-hidden="true"><path d="M81.9955 61.4968C76.5589 61.4968 71.3449 63.6565 67.5006 67.5008C63.6563 71.3451 61.4966 76.5591 61.4966 81.9957C61.4966 87.4324 63.6563 92.6464 67.5006 96.4907C71.3449 100.335 76.5589 102.495 81.9955 102.495C87.4322 102.495 92.6462 100.335 96.4904 96.4907C100.335 92.6464 102.494 87.4324 102.494 81.9957C102.494 76.5591 100.335 71.3451 96.4904 67.5008C92.6462 63.6565 87.4322 61.4968 81.9955 61.4968ZM81.9955 116.161C72.9344 116.161 64.2444 112.561 57.8373 106.154C51.4301 99.7468 47.8306 91.0568 47.8306 81.9957C47.8306 72.9347 51.4301 64.2447 57.8373 57.8375C64.2444 51.4304 72.9344 47.8309 81.9955 47.8309C91.0566 47.8309 99.7466 51.4304 106.154 57.8375C112.561 64.2447 116.16 72.9347 116.16 81.9957C116.16 91.0568 112.561 99.7468 106.154 106.154C99.7466 112.561 91.0566 116.161 81.9955 116.161ZM81.9955 30.7484C47.8306 30.7484 18.6538 51.999 6.83276 81.9957C18.6538 111.993 47.8306 133.243 81.9955 133.243C116.16 133.243 145.337 111.993 157.158 81.9957C145.337 51.999 116.16 30.7484 81.9955 30.7484Z"/></svg>`
   };
 
-  /* Side menu icons. They use currentColor, so their colour is set in SECTION 3 under "Menu rows". */
+  /* Side menu icons. They use currentColor, so their colour is set in SECTION 3 under "Rail sections".
+     amenities is not on the rail right now (Amenities sits inside Kayen), but stays ready to use. */
   const MENU_ICONS = {
     masterplan: `<svg viewBox="0 0 29 29" fill="none" aria-hidden="true"><path d="M11.9271 11.9276H16.6982M11.9271 11.9276V16.6987M11.9271 11.9276L7.75233 7.75284M16.6982 11.9276V16.6987M16.6982 11.9276L20.8729 7.75284M16.6982 16.6987H11.9271M16.6982 16.6987L20.8729 20.8734M11.9271 16.6987L7.75233 20.8734M11.8793 7.15645C11.7697 6.38898 11.4484 5.66721 10.9516 5.07202C10.4549 4.47683 9.80215 4.03173 9.06665 3.78659C8.33115 3.54145 7.54193 3.50596 6.7874 3.6841C6.03287 3.86223 5.34285 4.24695 4.79465 4.79515C4.24645 5.34335 3.86173 6.03337 3.68359 6.7879C3.50546 7.54243 3.54095 8.33166 3.78609 9.06715C4.03123 9.80265 4.47632 10.4554 5.07152 10.9521C5.66671 11.4489 6.38847 11.7702 7.15595 11.8798M21.4693 11.8798C22.2368 11.7702 22.9585 11.4489 23.5537 10.9521C24.1489 10.4554 24.594 9.80265 24.8391 9.06715C25.0843 8.33166 25.1198 7.54243 24.9416 6.7879C24.7635 6.03337 24.3788 5.34335 23.8306 4.79515C23.2824 4.24695 22.5924 3.86223 21.8378 3.6841C21.0833 3.50596 20.2941 3.54145 19.5586 3.78659C18.8231 4.03173 18.1704 4.47683 17.6736 5.07202C17.1768 5.66721 16.8556 6.38898 16.7459 7.15645M16.7459 21.4698C16.8556 22.2373 17.1768 22.959 17.6736 23.5542C18.1704 24.1494 18.8231 24.5945 19.5586 24.8396C20.2941 25.0848 21.0833 25.1203 21.8378 24.9421C22.5924 24.764 23.2824 24.3793 23.8306 23.8311C24.3788 23.2829 24.7635 22.5929 24.9416 21.8383C25.1198 21.0838 25.0843 20.2946 24.8391 19.5591C24.594 18.8236 24.1489 18.1709 23.5537 17.6741C22.9585 17.1773 22.2368 16.8561 21.4693 16.7464M7.15595 16.7464C6.38847 16.8561 5.66671 17.1773 5.07152 17.6741C4.47632 18.1709 4.03123 18.8236 3.78609 19.5591C3.54095 20.2946 3.50546 21.0838 3.68359 21.8383C3.86173 22.5929 4.24645 23.2829 4.79465 23.8311C5.34285 24.3793 6.03287 24.764 6.7874 24.9421C7.54193 25.1203 8.33115 25.0848 9.06665 24.8396C9.80215 24.5945 10.4549 24.1494 10.9516 23.5542C11.4484 22.959 11.7697 22.2373 11.8793 21.4698" stroke="currentColor" stroke-width="2.38556" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
 
@@ -152,6 +214,14 @@
      ================================================================= */
   const CSS = `
     /* ---------- Colours, fonts and sizes: change them here ---------- */
+    @font-face {
+      font-family: "Rawan Sans";
+      src: url("fonts/Rawan Sans.otf") format("opentype");
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+    }
+
     #rw {
       --ink: #2A2A38;
       --gold: #C0B177;
@@ -162,14 +232,32 @@
       --serif: "Rawan Sans", "Cormorant Garamond", Georgia, serif;
       --sans: "DM Sans", system-ui, sans-serif;
 
-      --topbar-h: 64px;
-      --sidebar-w: min(340px, 84%);
+      /* Width of the rail. Grows with the screen, from 128px up to 160px. Phones use 76px. */
+      --sidebar-w: clamp(128px, 9vw, 160px);
+
+      /* Logo at the top of the rail, and where it settles when everything is hidden */
+      --logo-w: calc(var(--sidebar-w) - 20px);
+      --logo-h: calc(var(--logo-w) * 555 / 2137);   /* the artwork is 2137 x 555 */
+      --logo-top: 28px;                               /* space above the logo, the same as when hidden */
+      --logo-gap: 28px;                               /* at least this much space below it */
+
+      /* Rail sections (and the Show button): icon with a small title under it.
+         Phones and short screens shrink these at the end of this section. */
+      --rail-pad: 12px;                     /* space between the rail's edges and its sections */
+      --rail-bottom: clamp(16px, 8vh, 80px); /* space under the last section */
+      --row-h: clamp(64px, 9.4vh, 84px);    /* smallest height of a section; shorter on short laptop screens */
+      --row-pad: 12px;                      /* space above the icon and below the title */
+      --row-gap: 8px;                       /* space between the icon and its title */
+      --row-space: 4px;                     /* space between two sections */
+      --row-radius: 20px;
+      --icon: 28px;
+      --label: 12px;
 
       --ease: cubic-bezier(.23, 1, .32, 1);
       --ease-drawer: cubic-bezier(.32, .72, 0, 1);
 
-      /* How the side menu moves. */
-      --slide: .28s var(--ease);
+      /* How fast the rail slides away with Hide. It comes back a little slower (#rw.sidebar-open below). */
+      --slide: .4s var(--ease-drawer);
 
       --safe-top: env(safe-area-inset-top, 0px);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -183,7 +271,7 @@
       color: var(--cream);
       -webkit-font-smoothing: antialiased;
     }
-    #rw.sidebar-open { --slide: .45s var(--ease-drawer); }
+    #rw.sidebar-open { --slide: .65s var(--ease-drawer); }
 
     :where(#rw) * { box-sizing: border-box; margin: 0; padding: 0; }
     :where(#rw) svg { display: block; }
@@ -194,196 +282,275 @@
     #rw :focus-visible { outline: 2px solid var(--avocado); }
 
 
-    /* ---------- Top bar ---------- */
-    #rw-topbar {
-      position: absolute; top: 0; left: 0; right: 0; z-index: 1;
-      height: calc(var(--topbar-h) + var(--safe-top));
-      padding: var(--safe-top) max(16px, var(--safe-right)) 0 max(16px, var(--safe-left));
-      display: flex; align-items: center; justify-content: space-between;
-      background: var(--ink);
-      border-bottom: 1px solid var(--line);
-      pointer-events: auto;
+    /* ---------- Top right: name of the scene that is showing ---------- */
+    #rw-corner {
+      position: absolute; z-index: 1;
+      top: calc(16px + var(--safe-top)); right: max(16px, var(--safe-right));
+      display: flex; align-items: center;
+      max-width: calc(100% - var(--sidebar-w) - 48px);
     }
-
-    #rw-logo {
-      display: flex; align-items: center; min-height: 32px; white-space: nowrap;
-      color: var(--gold); font: 24px var(--serif); letter-spacing: .08em; text-transform: uppercase;
+    #rw-title {
+      display: flex; align-items: center; gap: 10px; min-width: 0;
+      height: 44px; padding: 0 22px 0 16px; border-radius: 999px;
+      background: rgba(30, 31, 46, .72);
+      border: 1px solid rgba(255, 255, 255, .18);
+      -webkit-backdrop-filter: blur(28px) saturate(1.8);
+              backdrop-filter: blur(28px) saturate(1.8);
+      box-shadow: 0 12px 32px rgba(10, 10, 20, .3), 0 2px 6px rgba(10, 10, 20, .18);
+      pointer-events: none; /* the panorama underneath stays draggable */
+      transition: opacity .5s var(--ease), transform .7s var(--ease);
     }
-    #rw-logo .rw-mark { position: relative; display: block; height: 38px; aspect-ratio: 3.72; }
-    #rw-logo .rw-mark img {
-      position: absolute; left: -12.5%; top: 50%; width: 125%; height: auto;
-      transform: translateY(-50%); pointer-events: none;
+    @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+      #rw-title { background: rgba(42, 42, 56, .92); }
     }
-
-    #rw-fullscreen {
-      display: grid; place-items: center; width: 42px; height: 42px;
-      border-radius: 50%; border: 1px solid var(--line);
-      transition: background-color .2s, color .2s, transform .16s;
+    #rw-title.is-empty { opacity: 0; transform: translateY(-8px); }
+    #rw.all-hidden #rw-title {
+      opacity: 0; visibility: hidden; transform: translateY(-8px);
+      transition: opacity .3s ease, transform .3s var(--ease), visibility 0s .3s;
     }
-    #rw-fullscreen svg { width: 18px; height: 18px; }
-    #rw-fullscreen:active { transform: scale(.97); }
+    #rw-title svg { width: 14px; flex: none; color: var(--gold); }
+    #rw-title span {
+      min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      font: 400 15px var(--serif); letter-spacing: .08em; color: var(--cream);
+    }
+    #rw-title span.is-in { animation: rw-title-in .7s var(--ease) backwards; }
+    @keyframes rw-title-in { from { opacity: 0; transform: translateY(6px); } }
 
 
-    /* ---------- Side menu: slides in and out from the left ---------- */
-    /* This outer box moves. It holds the tab and the menu, so the two can never drift apart. */
+    /* ---------- Side menu: a slim rail on the left ---------- */
+    /* The rail slides in when the tour starts and slides out with Hide. The layers live inside it. */
     #rw-sidebar {
-      position: absolute; top: calc(var(--topbar-h) + var(--safe-top)); bottom: 0; left: 0;
+      position: absolute; top: 0; bottom: 0; left: 0;
       width: var(--sidebar-w);
-      transform: translateX(calc(-100% + var(--safe-left)));
-      transition: transform var(--slide);
+      transform: translateX(calc(-100% - 48px));   /* 48px more, so its shadow goes too */
+      visibility: hidden;                           /* so Tab skips it while it is away */
+      transition: transform var(--slide), visibility 0s .4s;
     }
-    #rw.sidebar-open #rw-sidebar { transform: none; }
+    #rw.sidebar-open #rw-sidebar { transform: none; visibility: visible; transition: transform var(--slide); }
 
-    /* The menu itself: rounded top right corner, ink background */
+    /* The rail itself: square corners, ink background */
     #rw-sidebar-body {
       position: absolute; inset: 0;
       display: flex; flex-direction: column; overflow: hidden;
       pointer-events: auto;
       background: var(--ink);
       border-right: 1px solid var(--line);
-      border-top-right-radius: 28px;
       box-shadow: 12px 0 32px rgba(0, 0, 0, .35);
-      visibility: hidden;
-      transition: visibility 0s .28s;
     }
-    #rw.sidebar-open #rw-sidebar-body { visibility: visible; transition: none; }
 
-    /* Gold line pattern, fading out towards the bottom */
+    /* Gold line pattern at the top and bottom of the rail, fading out towards the middle */
     #rw-sidebar-body::before {
       content: ""; position: absolute; inset: 0; pointer-events: none;
       background: ${buildPattern()} 50% 50% / ${PATTERN_SIZE} no-repeat;
-      -webkit-mask-image: linear-gradient(180deg, #000, transparent 55%);
-              mask-image: linear-gradient(180deg, #000, transparent 55%);
+      -webkit-mask-image: linear-gradient(180deg, #000, transparent 45%, transparent 70%, #0009);
+              mask-image: linear-gradient(180deg, #000, transparent 45%, transparent 70%, #0009);
     }
 
 
-    /* ---------- Side menu tab: hides and shows the menu ---------- */
-    /* Rides on the menu's right edge and overlaps its border, so tab and menu read as one shape */
-    #rw-sidebar-toggle {
-      position: absolute; top: 50%; left: 100%; margin-left: -1px;
-      width: 34px; height: 92px; /* fixed, so it stays put when the label changes */
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
-      background: var(--ink); color: var(--gold);
-      border: 1px solid var(--line); border-left: 0;
-      border-radius: 0 16px 16px 0;
-      box-shadow: 6px 0 18px rgba(0, 0, 0, .28);
-      transform: translateY(-50%);
-      transform-origin: left center;
-      transition: color .2s, transform .16s;
+    /* ---------- Logo: top of the rail. When everything is hidden it stays, in the top left corner. ---------- */
+    /* It sits outside the rail, so the rail can slide away from under it */
+    #rw-logo {
+      position: absolute; z-index: 1;
+      top: calc(var(--logo-top) + var(--safe-top));
+      left: calc((var(--sidebar-w) - var(--logo-w)) / 2);
+      width: var(--logo-w); height: var(--logo-h);
+      pointer-events: none;   /* the panorama underneath stays draggable */
+      transform-origin: left top;
+      transition: transform .55s var(--ease-drawer);
+      animation: rw-logo-in 1s var(--ease) .1s backwards;
     }
-    /* Invisible extra area, so it is easy to tap on a phone */
-    #rw-sidebar-toggle::after { content: ""; position: absolute; inset: -6px -12px -6px 0; }
-    #rw-sidebar-toggle:active { transform: translateY(-50%) scale(.97); }
-    #rw-sidebar-toggle svg {
-      width: 16px; height: 16px;
-      transition: transform .3s var(--ease);
+    @keyframes rw-logo-in { from { opacity: 0; transform: translateY(-6px); } }
+    /* The PNG is 2658 x 1299 with the artwork at 261, 372 to 2398, 927. These numbers crop the empty space. */
+    #rw-logo img {
+      position: absolute; left: -12.21%; top: -67.03%; width: 124.38%; height: auto; max-width: none;
+      transition: filter .4s ease;
     }
-    #rw.sidebar-open #rw-sidebar-toggle svg { transform: rotate(180deg); }
-    #rw-sidebar-toggle span {
-      writing-mode: vertical-rl;
-      font-size: 10px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase;
+    /* When everything is hidden the logo stays exactly where it is. A soft shadow keeps the gold readable over a bright sky */
+    #rw.all-hidden #rw-logo img { filter: drop-shadow(0 1px 10px rgba(10, 10, 20, .45)); }
+
+    /* A gentle shade in the top left corner behind the logo, only while everything is hidden */
+    #rw::before {
+      content: ""; position: absolute; left: 0; top: 0; width: min(560px, 80%); height: 300px;
+      background: radial-gradient(farthest-side at 0 0, rgba(16, 16, 26, .5), rgba(16, 16, 26, .18) 55%, transparent);
+      pointer-events: none; opacity: 0;
+      transition: opacity .35s ease;
     }
+    #rw.all-hidden::before { opacity: 1; transition: opacity .8s ease .15s; }
 
 
-    /* ---------- Side menu header: title and back arrow ---------- */
-    #rw-sidebar-header {
-      position: relative; display: flex; align-items: center; gap: 12px; min-height: 70px;
-      padding: 18px 24px;
-      border-bottom: 1px solid var(--line);
-    }
-    #rw-sidebar-header h3 {
-      font: 400 20px var(--serif); letter-spacing: .1em; text-transform: uppercase; color: var(--gold);
-    }
-    #rw-sidebar-header .rw-back {
-      flex: none; display: grid; place-items: center; width: 34px; height: 34px; margin-left: -6px;
-      border-radius: 50%; border: 1px solid #C0B17760;
-      transition: background-color .2s, color .2s, transform .16s;
-    }
-    #rw-sidebar-header .rw-back svg { width: 16px; height: 16px; }
-    #rw-sidebar-header .rw-back:active { transform: scale(.97); }
+    /* ---------- Rail sections: icon with a small title under it ---------- */
+    #rw-menu, #rw-show, #rw-layers, #rw-dock { font-family: var(--sans); }
 
-
-    /* ---------- Side menu content: the menu list OR a panel, never both ---------- */
-    #rw-menu, #rw-panel {
-      position: relative; flex: 1; overflow: auto; overscroll-behavior: contain;
-      scrollbar-width: thin; scrollbar-color: #D2DB1259 transparent;
+    #rw-menu {
+      position: relative; flex: 1; min-height: 0;
+      display: flex; flex-direction: column;
+      /* The top padding leaves room for the logo */
+      padding: calc(var(--logo-top) + var(--logo-h) + var(--logo-gap) + var(--safe-top)) var(--rail-pad) var(--rail-bottom);
+      overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
+      scrollbar-width: none;
     }
-    #rw-menu { padding: 16px; }
-    #rw-panel { padding: 18px 24px 24px; }
-
-    #rw-sidebar-body[data-view=menu] .rw-back,
-    #rw-sidebar-body[data-view=menu] #rw-panel,
-    #rw-sidebar-body[data-view=panel] #rw-menu { display: none; }
-
-
-    /* ---------- Menu rows: gold icon and label ---------- */
-    #rw-menu button {
-      position: relative; display: flex; align-items: center; gap: 16px;
-      width: 100%; min-height: 56px; padding: 0 18px; border-radius: 999px;
-      text-align: left; font: 400 18px var(--serif); letter-spacing: .02em; word-spacing: -.12em;
-      transition: background-color .2s ease;
+    #rw-menu::-webkit-scrollbar { display: none; }
+    /* Short fading lines above and below the sections. Their auto margins keep the group centred. */
+    #rw-menu::before, #rw-menu::after {
+      content: ""; flex: none; align-self: center; width: min(44px, 56%); height: 1px;
+      background: linear-gradient(90deg, transparent, #C0B17788, transparent);
     }
-    #rw-menu button + button { margin-top: 8px; }
-    #rw-menu button:active { transform: scale(.97); }
-    #rw-menu button svg {
-      position: relative; flex: none; width: 32px; height: 32px; color: var(--gold);
+    #rw-menu::before { margin: auto 0 16px; }
+    #rw-menu::after { margin: 16px 0 auto; }
+
+    /* Icon and title: the same in every section, in Hide (the last row) and in the Show tab */
+    #rw-menu .rw-row, #rw-show {
+      flex: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--row-gap);
+      min-height: var(--row-h); padding: var(--row-pad) 4px;
+      text-align: center;
+    }
+    #rw-menu .rw-row > svg, #rw-show > svg {
+      position: relative; flex: none; width: var(--icon); height: var(--icon); color: var(--gold);
+      transition: color .2s ease, transform .16s ease;
+    }
+    #rw-menu .rw-row span, #rw-show span {
+      position: relative; max-width: 100%;
+      font: 400 var(--label)/1.25 var(--sans); letter-spacing: .03em; color: #ECEBE3c2;
       transition: color .2s ease;
     }
-    #rw-menu button span { position: relative; transition: transform .3s var(--ease); }
-    #rw.sidebar-open #rw-menu button { animation: rw-slide-in .45s var(--ease) both; }
 
-    /* Current row: soft olive pill behind it */
-    #rw-menu button::before {
+    #rw-menu .rw-row {
+      position: relative; width: 100%; border-radius: var(--row-radius);
+      transition: background-color .2s ease;
+    }
+    #rw-menu .rw-row + .rw-row { margin-top: var(--row-space); }
+    #rw-menu .rw-row:active { transform: scale(.96); }
+    #rw.sidebar-open #rw-menu .rw-row { animation: rw-slide-in .7s var(--ease) backwards; }
+
+    /* Current section: soft olive tile, bar on the rail's left edge, avocado icon */
+    #rw-menu .rw-row::before {
       content: ""; position: absolute; inset: 0; border-radius: inherit;
-      background: linear-gradient(90deg, rgba(210, 219, 18, .3), rgba(210, 219, 18, .1));
+      background: linear-gradient(135deg, rgba(210, 219, 18, .3), rgba(210, 219, 18, .1));
       opacity: 0;
       transition: opacity .2s ease;
     }
-    /* Current row: bar on the menu's left edge. left matches the padding of #rw-menu. */
-    #rw-menu button::after {
-      content: ""; position: absolute; top: 0; bottom: 0; left: -16px; width: 4px;
+    /* left matches the padding of #rw-menu, so the bar touches the rail's edge */
+    #rw-menu .rw-row::after {
+      content: ""; position: absolute; top: 20%; bottom: 20%; left: calc(-1 * var(--rail-pad)); width: 4px;
       border-radius: 0 4px 4px 0;
       background: var(--avocado);
       opacity: 0; transform: scaleY(.5);
       transition: opacity .2s ease, transform .25s var(--ease);
     }
-    #rw-menu button.is-current::before { opacity: 1; }
-    #rw-menu button.is-current::after { opacity: 1; transform: none; }
-    #rw-menu button.is-current svg { color: var(--avocado); }
+    #rw-menu .rw-row.is-current::before { opacity: 1; }
+    #rw-menu .rw-row.is-current::after { opacity: 1; transform: none; }
+    #rw-menu .rw-row.is-current > svg { color: var(--avocado); }
+    #rw-menu .rw-row.is-current span { color: var(--cream); }
 
     @keyframes rw-slide-in { from { opacity: 0; transform: translateX(-12px); } }
 
 
-    /* ---------- Credit: stays at the bottom of the side menu ---------- */
-    #rw-sidebar-body .rw-credit {
-      position: relative; display: flex; align-items: center; gap: 10px;
-      padding: 12px 24px calc(18px + var(--safe-bottom));
-      font-size: 10px; line-height: 1.7; letter-spacing: .1em; text-transform: uppercase;
-      color: #ECEBE3d9;
-      border-top: 1px solid #C0B17740;
+    /* ---------- Show: waits at the middle of the left edge while navigation is hidden ---------- */
+    #rw-show {
+      position: absolute; left: calc(12px + var(--safe-left)); top: 50%;
+      width: 60px; height: 60px; min-height: 60px; padding: 0; gap: 4px;
+      background: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      box-shadow: 12px 0 32px rgba(0, 0, 0, .35);
+      transform: translateX(calc(-100% - 48px)) translateY(-50%); visibility: hidden;
+      transition: transform .3s var(--ease), visibility 0s .3s;
     }
-    #rw-sidebar-body .rw-credit svg { width: 8px; flex: none; color: var(--avocado); }
+    /* It slides in just after the rail has gone */
+    #rw:not(.sidebar-open) #rw-show { transform: translateY(-50%); visibility: visible; transition: transform .5s var(--ease-drawer) .2s; }
+    #rw-show:active svg { transform: scale(.9); }
+    /* A smaller eye and title than the sections */
+    #rw-show > svg { width: 20px; height: 20px; }
+    #rw-show span { font-size: 9px; }
 
 
-    /* ---------- Bottom dock: stays centred at the bottom of the screen ---------- */
+    /* ---------- Layers: panels that open beside the rail, one for each level ---------- */
+    #rw-layers { position: absolute; inset: 0; pointer-events: none; }
+    #rw-layers .rw-layer {
+      --layer-w: clamp(220px, 17vw, 260px);
+      position: absolute; top: 16px;
+      /* Each further layer sits 10px to the right of the one before */
+      left: calc(100% + 10px + var(--depth) * (var(--layer-w) + 10px));
+      width: var(--layer-w); max-height: calc(100% - 32px);
+      display: flex; flex-direction: column;
+      padding: 10px; border-radius: 18px;
+      background: var(--ink);
+      border: 1px solid #C0B17740;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, .42), 0 2px 8px rgba(0, 0, 0, .25);
+      pointer-events: auto;
+      opacity: 0; transform: translateX(-10px) scale(.98); transform-origin: left top;
+      transition: opacity .18s ease, transform .2s ease;
+    }
+    #rw-layers .rw-layer.is-in {
+      opacity: 1; transform: none;
+      transition: opacity .3s var(--ease), transform .45s var(--ease);
+    }
+    /* Content panels from cards.js (About, Residences) need more room */
+    #rw-layers .rw-layer.is-content { --layer-w: clamp(300px, 24vw, 360px); }
+
+    #rw-layers .rw-layer-list {
+      min-height: 0; overflow: auto; overscroll-behavior: contain;
+      scrollbar-width: thin; scrollbar-color: #D2DB1259 transparent;
+    }
+    #rw-layers #rw-panel { padding: 2px 8px 8px; }
+
+    /* Rows in a layer: text only, with an arrow when they open another layer */
+    #rw-layers .rw-layer-row {
+      position: relative; display: flex; align-items: center; gap: 10px;
+      width: 100%; min-height: 46px; padding: 0 12px 0 16px; border-radius: 12px;
+      text-align: left; font: 400 14px var(--sans); letter-spacing: .02em; color: var(--cream);
+      transition: background-color .2s ease, color .2s ease, transform .2s var(--ease);
+    }
+    #rw-layers .rw-layer-row + .rw-layer-row { margin-top: 2px; }
+    #rw-layers .rw-layer-row span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #rw-layers .rw-layer-row:active { transform: scale(.98); }
+    /* The row whose layer is open, and the scene that is showing */
+    #rw-layers .rw-layer-row.is-open,
+    #rw-layers .rw-layer-row.is-showing { background-color: #ECEBE314; color: var(--avocado); }
+    /* A row still waiting for its panorama */
+    #rw-layers .rw-layer-row.is-waiting { color: #ECEBE373; cursor: default; }
+    #rw-layers .rw-layer-row.is-waiting:active { transform: none; }
+
+    #rw-layers .rw-chev {
+      flex: none; display: grid; place-items: center; width: 16px; height: 16px; margin-left: auto;
+      color: var(--gold); transition: transform .3s var(--ease), color .2s ease;
+    }
+    #rw-layers .rw-chev svg { width: 16px; height: 16px; }
+    #rw-layers .rw-layer-row.is-open .rw-chev { color: var(--avocado); }
+
+    /* Rows slide in one after another as their layer opens */
+    #rw-layers .rw-layer.is-in .rw-layer-row {
+      animation: rw-row-in .45s var(--ease) backwards;
+      animation-delay: calc(60ms + var(--i, 0) * 30ms);
+    }
+    @keyframes rw-row-in { from { opacity: 0; transform: translateX(-8px); } }
+
+
+    /* ---------- Bottom dock: centred in the space beside the rail ---------- */
     #rw-dock {
-      --pill-h: 46px;
-      --dock-gap: 18px;
-      position: absolute; left: 0; right: 0;
+      --pill-h: 40px;
+      --dock-gap: 16px;
+      position: absolute; left: var(--sidebar-w); right: 0;
       bottom: calc(var(--dock-gap) + var(--safe-bottom));
       padding: 0 var(--dock-gap);
       display: flex; justify-content: center;
-      transition: transform .5s var(--ease-drawer), opacity .35s ease .1s, visibility 0s;
+      transition: transform .8s var(--ease-drawer), opacity .55s ease .05s, visibility 0s;
     }
     #rw-dock.is-hidden {
-      opacity: 0; visibility: hidden; transform: translateY(32px);
-      transition: transform .35s var(--ease), opacity .2s ease, visibility 0s .35s;
+      opacity: 0; visibility: hidden; transform: translateY(28px) scale(.97);
+      transition: transform .45s var(--ease), opacity .3s ease, visibility 0s .45s;
     }
+    #rw.all-hidden #rw-dock {
+      opacity: 0; visibility: hidden; transform: translateY(28px) scale(.97); pointer-events: none;
+      transition: transform .45s var(--ease), opacity .3s ease, visibility 0s .45s;
+    }
+    /* Hiding with no animation at all (used when a section has too few scenes) */
+    #rw-dock.is-instant, #rw-dock.is-instant.is-hidden { transition: none; }
 
     #rw-dock .rw-strip {
       position: relative; max-width: min(1000px, 100%);
       display: flex; align-items: center; gap: 4px;
-      padding: 7px; border-radius: 999px; pointer-events: auto;
+      padding: 6px; border-radius: 999px; pointer-events: auto;
       background: rgba(30, 31, 46, .72);
       border: 1px solid rgba(255, 255, 255, .18);
       -webkit-backdrop-filter: blur(28px) saturate(1.8);
@@ -423,68 +590,78 @@
 
     #rw-dock .rw-pill {
       position: relative; flex: none; height: var(--pill-h); scroll-snap-align: center;
-      display: flex; align-items: center; padding: 0 22px;
+      display: flex; align-items: center; padding: 0 18px;
       border-radius: 999px;
       background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .12);
-      color: #F5F4EE; font-size: 12px; font-weight: 500; line-height: 1;
+      color: #F5F4EE; font-size: 11px; font-weight: 500; line-height: 1;
       letter-spacing: .1em; text-transform: uppercase; white-space: nowrap;
       text-shadow: 0 1px 2px rgba(0, 0, 0, .35);
-      transition: border-color .25s, background-color .25s, color .25s, box-shadow .25s, transform .16s;
+      transition: border-color .45s var(--ease), background-color .45s var(--ease), color .45s var(--ease), box-shadow .45s var(--ease), transform .2s var(--ease);
+      animation: rw-pill-in .7s var(--ease) backwards;   /* glides in; each pill a little later (SECTION 8) */
     }
+    @keyframes rw-pill-in { from { opacity: 0; transform: translateY(12px) scale(.94); } }
     #rw-dock .rw-pill:active { transform: scale(.97); }
-    #rw-dock .rw-pill.is-current {
+    /* The scene that is showing */
+    #rw-dock .rw-pill.is-showing {
       background: var(--avocado); border-color: var(--avocado);
       color: var(--ink); font-weight: 600; text-shadow: none;
       box-shadow: 0 6px 18px rgba(210, 219, 18, .35);
     }
+    /* A row still waiting for its panorama */
+    #rw-dock .rw-pill.is-waiting { color: #F5F4EE66; cursor: default; }
+    #rw-dock .rw-pill.is-waiting:active { transform: none; }
 
 
     /* ---------- Hover effects: only on devices with a real mouse ---------- */
     @media (hover: hover) and (pointer: fine) {
-      #rw-fullscreen:hover,
-      #rw-sidebar-header .rw-back:hover { background: rgba(210, 219, 18, .2); color: var(--avocado); }
-
-      #rw-sidebar-toggle:hover { color: var(--avocado); }
-      #rw-sidebar-toggle:hover svg { transform: translateX(2px); }
-      #rw.sidebar-open #rw-sidebar-toggle:hover svg { transform: rotate(180deg) translateX(2px); }
-
-      #rw-menu button:not(.is-current):hover { background-color: #ECEBE314; }
-      #rw-menu button:hover span { transform: translateX(4px); }
+      #rw-menu .rw-row:not(.is-current):hover { background-color: #ECEBE314; }
+      #rw-menu .rw-row:hover span, #rw-show:hover span { color: var(--cream); }
+      #rw-show:hover svg { color: var(--avocado); }
+      #rw-layers .rw-layer-row:not(.is-open):not(.is-showing):not(.is-waiting):hover { background-color: #ECEBE30d; }
+      #rw-layers .rw-layer-row:hover .rw-chev { transform: translateX(2px); }
 
       #rw-dock .rw-arrow:not(:disabled):hover { background: rgba(255, 255, 255, .16); }
-      #rw-dock .rw-pill:not(.is-current):hover { background-color: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .26); }
+      #rw-dock .rw-pill:not(.is-showing):not(.is-waiting):hover { background-color: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .26); }
     }
 
 
     /* ---------- Phones (classes are set in SECTION 10) ---------- */
-    #rw.is-phone #rw-topbar {
-      padding-left: max(8px, var(--safe-left));
-      padding-right: max(8px, var(--safe-right));
+    #rw.is-phone {
+      --sidebar-w: 76px;
+      --rail-pad: 8px; --rail-bottom: 16px;
+      --row-h: 62px; --row-pad: 10px; --row-gap: 7px; --row-space: 6px; --row-radius: 14px; --icon: 24px; --label: 9.5px;
+      --logo-w: 60px; --logo-top: 16px; --logo-gap: 20px;
     }
-    #rw.is-phone #rw-fullscreen { width: 40px; height: 40px; }
-    #rw.is-phone #rw-logo { font-size: 18px; }
-    #rw.is-phone #rw-logo .rw-mark { height: 30px; }
-    #rw.is-phone #rw-dock { --pill-h: 40px; --dock-gap: 10px; }
-    #rw.is-phone #rw-dock .rw-strip { padding: 5px; }
+    #rw.is-phone #rw-corner { top: calc(10px + var(--safe-top)); right: max(10px, var(--safe-right)); }
+    #rw.is-phone #rw-title { height: 38px; padding: 0 16px 0 13px; }
+    #rw.is-phone #rw-title span { font-size: 12.5px; letter-spacing: .06em; }
+    #rw.is-phone #rw-dock { --pill-h: 36px; --dock-gap: 10px; }
+    #rw.is-phone #rw-dock .rw-strip { padding: 4px; }
     #rw.is-phone #rw-dock .rw-arrow { display: none; }
-    #rw.is-phone #rw-dock .rw-pill { padding: 0 16px; font-size: 11px; }
+    #rw.is-phone #rw-dock .rw-pill { padding: 0 14px; font-size: 10px; }
 
-    /* Phones held sideways: slimmer top bar and menu rows, so more of the panorama shows */
-    #rw.is-short { --topbar-h: 54px; }
-    #rw.is-short #rw-sidebar-header { min-height: 54px; padding-top: 10px; padding-bottom: 10px; }
-    #rw.is-short #rw-menu button { min-height: 46px; font-size: 16px; }
-    #rw.is-short #rw-menu button + button { margin-top: 4px; }
-    #rw.is-short #rw-menu button svg { width: 26px; height: 26px; }
+    /* Phones: no room for panels side by side, so they stack in one column beside the rail.
+       SECTION 6 places each one under the one before. */
+    #rw.is-phone #rw-layers .rw-layer { --layer-w: 230px; left: calc(100% + 8px); }
+    #rw.is-phone #rw-layers .rw-layer.is-content { --layer-w: 300px; }
+    /* When a taller panel opens below, the column glides up to make room */
+    #rw.is-phone #rw-layers .rw-layer.is-in { transition: opacity .3s var(--ease), transform .45s var(--ease), top .35s var(--ease); }
 
-    /* Narrow phones: the dock overlays the menu's bottom edge, so lift the credit above it. */
-    #rw.is-narrow #rw-sidebar-body .rw-credit { padding-bottom: calc(80px + var(--safe-bottom)); }
+    /* Phones held sideways: tighter sections, so they all fit */
+    #rw.is-short {
+      --row-h: 50px; --row-pad: 6px; --row-gap: 4px; --row-space: 2px; --icon: 20px; --label: 9px;
+      --logo-top: 12px; --logo-gap: 12px; --rail-bottom: 8px;
+    }
+    #rw.is-short #rw-menu::before { margin-bottom: 8px; }
+    #rw.is-short #rw-menu::after { margin-top: 8px; }
+    #rw.is-short #rw-layers .rw-layer-row { min-height: 40px; }
 
 
     /* ---------- Reduced motion: things still work, they just do not slide ---------- */
     @media (prefers-reduced-motion: reduce) {
-      #rw, #rw.sidebar-open { --slide: 0s; }
+      #rw-sidebar, #rw-show, #rw-logo { transition: none !important; }
       #rw * { animation: none !important; }
-      #rw-menu button span { transform: none !important; }
+      #rw-layers .rw-layer, #rw-layers .rw-layer.is-in, #rw.is-phone #rw-layers .rw-layer.is-in { transform: none; transition: opacity .2s ease; }
       #rw-dock, #rw-dock.is-hidden { transition: none; }
     }
   `;
@@ -523,29 +700,24 @@
   let ui = null;   /* every element the script needs, filled in below */
 
   function buildUI() {
-    const logo = CONFIG.logo
-      ? `<span class="rw-mark"><img src="${CONFIG.logo}" alt="${CONFIG.logoText}" decoding="async"></span>`
-      : CONFIG.logoText;
-
     const root = el('div', { id: 'rw' }, `
-      <header id="rw-topbar">
-        <div id="rw-logo">${logo}</div>
-        <button id="rw-fullscreen" aria-label="Enter fullscreen">${ICONS.fullscreen}</button>
-      </header>
+      <div id="rw-corner">
+        <div id="rw-title" class="is-empty">${STAR}<span></span></div>
+      </div>
 
       <nav id="rw-sidebar" aria-label="Menu">
-        <button id="rw-sidebar-toggle" aria-controls="rw-sidebar-body">${ICONS.next}<span></span></button>
-
-        <div id="rw-sidebar-body" data-view="menu">
-          <div id="rw-sidebar-header">
-            <button class="rw-back" aria-label="Back to menu">${ICONS.prev}</button>
-            <h3>${CONFIG.menuTitle}</h3>
+        <div id="rw-sidebar-body">
+          <div id="rw-menu">
+            <button id="rw-hide" class="rw-row" aria-label="Hide all navigation">${ICONS.hide}<span>Hide All</span></button>
           </div>
-          <div id="rw-menu"></div>
-          <div id="rw-panel"></div>
-          <p class="rw-credit">${STAR}<span>${CONFIG.credit}</span></p>
         </div>
+
+        <div id="rw-layers"></div>
       </nav>
+
+      <div id="rw-logo"><img src="${CONFIG.logo}" alt="${CONFIG.logoText}" decoding="async" fetchpriority="high"></div>
+
+      <button id="rw-show" aria-label="Show navigation">${ICONS.show}<span>Show</span></button>
 
       <div id="rw-dock">
         <div class="rw-strip" role="region" aria-label="Scenes">
@@ -562,16 +734,14 @@
       root: root,
       host: doc.body || doc.documentElement,
 
-      fullscreenBtn: $('#rw-fullscreen'),
+      title: $('#rw-title'),
+      titleText: $('#rw-title span'),
 
       sidebar: $('#rw-sidebar'),
-      sidebarToggle: $('#rw-sidebar-toggle'),
-      sidebarToggleLabel: $('#rw-sidebar-toggle span'),
-      sidebarBody: $('#rw-sidebar-body'),
-      heading: $('#rw-sidebar-header h3'),
-      backBtn: $('.rw-back'),
       menuList: $('#rw-menu'),
-      panel: $('#rw-panel'),
+      layers: $('#rw-layers'),
+      hideBtn: $('#rw-hide'),
+      showBtn: $('#rw-show'),
 
       dock: $('#rw-dock'),
       track: $('.rw-track'),
@@ -579,6 +749,9 @@
       nextBtn: $('.rw-next')
     };
 
+    const logoPreload = el('link', { rel: 'preload', as: 'image', href: CONFIG.logo });
+    logoPreload.fetchPriority = 'high';
+    doc.head.appendChild(logoPreload);
     doc.head.appendChild(setText(el('style'), CSS));
     if (!doc.querySelector(`link[href="${FONTS}"]`)) {
       doc.head.appendChild(el('link', { rel: 'stylesheet', href: FONTS }));
@@ -588,70 +761,63 @@
 
 
   /* =================================================================
-     SECTION 6. SIDE MENU
-     Two separate things to keep track of:
-       sidebarOpen  is it showing or hidden?
-       sidebarView  what is inside it: the menu list or a panel?
-     Hiding keeps the view, so reopening returns the visitor to where they were.
+     SECTION 6. SIDE MENU AND ITS LAYERS
+     The rail shows until Hide is pressed. Two things change while it shows:
+       currentRow  the highlighted section in the rail
+       layers      the panels open beside it, from first to deepest
      ================================================================= */
-  let sidebarOpen = false;
-  let sidebarView = 'menu';   /* 'menu', or a panel key from MENU such as 'overview' */
-  const panelRows = {};       /* panel key -> its menu row, so focus can return to it */
-  let currentRow = null;      /* the highlighted menu row */
+  let currentRow = null;      /* the highlighted section */
+  const layers = [];          /* open layers: { node, opener } from first to deepest (phones add columnTop to the first) */
+  let layerCount = 0;         /* gives every layer its own id */
 
-  function setSidebarOpen(open) {
-    sidebarOpen = open;
-    ui.root.classList.toggle('sidebar-open', open);
-    ui.sidebarToggle.setAttribute('aria-expanded', String(open));
-    ui.sidebarToggle.setAttribute('aria-label', open ? 'Hide menu' : 'Show menu');
-    setText(ui.sidebarToggleLabel, open ? 'Hide' : 'Menu');
+  /* Does this item open a panel of rows? */
+  function hasItems(item) {
+    return !!(item.items && item.items.length);
   }
 
-  function hideSidebar() {
-    const focusWasInside = ui.sidebarBody.contains(doc.activeElement);
-    setSidebarOpen(false);
-    if (focusWasInside) ui.sidebarToggle.focus();
+  /* The text on a row: its own label, or the name of its scene */
+  function labelOf(item) {
+    if (item.label) return item.label;
+    const scene = SCENES.find((entry) => entry.index === item.scene);
+    return scene ? titleCase(scene.title) : '';
   }
 
-  /* On narrow phones the open menu covers the panorama, so it moves
-     out of the way once the visitor has picked somewhere to go. */
-  function hideSidebarIfCoveringScene() {
-    if (ui.root.classList.contains('is-narrow')) hideSidebar();
+  /* Does clicking this row do anything yet? Rows waiting for their panorama show dimmed. */
+  function isWaiting(item) {
+    return !hasItems(item) && item.scene == null && item.goTo == null &&
+      !item.panel && !item.home && !item.href;
   }
 
-  function panelTitle(key) {
-    const item = MENU.find((entry) => entry.panel === key);
-    return item ? item.label : key;
-  }
-
-  /* Shows the menu list, or a panel ('overview', 'units') with a back arrow */
-  function showView(view) {
-    const cameFrom = sidebarView;
-    const isMenu = view === 'menu';
-    sidebarView = view;
-
-    ui.sidebarBody.dataset.view = isMenu ? 'menu' : 'panel';
-    setText(ui.heading, isMenu ? CONFIG.menuTitle : panelTitle(view));
-
-    if (!isMenu) {
-      ui.panel.textContent = '';
-      ui.panel.scrollTop = 0;
-      emit('rw:open', { panel: view, container: ui.panel });   /* cards.js fills the panel */
+  /* Shared by panel rows and dock pills: dimmed while waiting, lit up while its scene shows */
+  function setRowState(node, item) {
+    if (isWaiting(item)) {
+      node.classList.add('is-waiting');
+      node.setAttribute('aria-disabled', 'true');
     }
+    if (item.scene != null) {
+      node.dataset.scene = item.scene;
+      markShowing(node);
+    }
+  }
 
-    /* Keyboard users land on the back arrow, or back on the row they came from */
-    const focusTarget = isMenu ? panelRows[cameFrom] : ui.backBtn;
-    if (focusTarget) focusTarget.focus({ preventScroll: true });
+  /* Screen positions are doubled under 3DVista's phone zoom. Dividing by this undoes that. */
+  function zoomUnit() {
+    return parseFloat(ui.root.style.zoom) || 1;
+  }
+
+  /* On phones an open panel covers part of the panorama, so once a scene is picked the panels close */
+  function closeLayersOnPhone() {
+    if (ui.root.classList.contains('is-phone')) closeLayersFrom(0);
   }
 
   function goHome() {
-    hideSidebarIfCoveringScene();
+    closeLayersFrom(0);
     /* Script 2 shows the welcome page again. Without it, jump to the first scene. */
     const handled = !doc.dispatchEvent(new CustomEvent('rw:home', { cancelable: true }));
     if (!handled && SCENES.length) goToScene(SCENES[0].index);
   }
 
-  /* Moves the highlight (pill, edge bar and avocado icon) to this row */
+  /* Moves the highlight (tile, edge bar and avocado icon) to this section */
   function setCurrentRow(row) {
     if (currentRow) {
       currentRow.classList.remove('is-current');
@@ -662,48 +828,195 @@
     row.setAttribute('aria-current', 'true');
   }
 
-  function buildMenuRow(item, i) {
-    const row = el('button', null, `${MENU_ICONS[item.icon] || ''}<span></span>`);
-    setText(row.querySelector('span'), item.label);
-    row.style.animationDelay = (120 + Math.min(i * 35, 420)) + 'ms';
+  /* What every row does when clicked. depth: 0 = the rail, 1 = the first layer, and so on. */
+  function onRowClick(item, row, depth) {
+    if (item.home) return goHome();
+    if (item.href) return window.open(item.href, '_blank', 'noopener');
 
-    if (item.home) {
-      row.onclick = goHome;
-    } else if (item.href) {
-      row.onclick = () => window.open(item.href, '_blank', 'noopener');
+    if (depth === 0) setCurrentRow(row);
+
+    /* Jump first: on phones a jump closes open panels, and the panel this row opens must stay */
+    if (item.goTo != null) goToScene(item.goTo);
+
+    const opensLayer = hasItems(item) || item.panel;
+    if (opensLayer && row.classList.contains('is-open')) {
+      closeLayersFrom(depth);                   /* clicking it again closes its layer */
+    } else if (opensLayer) {
+      setDockItems(dockItemsOf(item));          /* first, so the layer knows how much room the dock takes */
+      openLayer(item, row, depth);
     } else {
-      row.onclick = () => {
-        setCurrentRow(row);
-        if (item.panel) showView(item.panel);
-      };
-      if (item.panel) panelRows[item.panel] = row;
+      closeLayersFrom(depth);                   /* a plain row closes anything opened further along */
+      if (depth === 0) setDockItems(ALL_SCENES);
     }
+
+    if (item.scene != null) goToScene(item.scene);
+  }
+
+  /* Sections, then Hide All, slide in one after another */
+  function slideInDelay(i) {
+    return (120 + Math.min(i * 35, 420)) + 'ms';
+  }
+
+  /* A section in the rail: icon with a small title under it */
+  function buildMenuRow(item, i) {
+    const row = el('button', { 'class': 'rw-row' }, `${MENU_ICONS[item.icon] || ''}<span></span>`);
+    setText(row.querySelector('span'), labelOf(item));
+    row.style.animationDelay = slideInDelay(i);
+    if (hasItems(item) || item.panel) row.setAttribute('aria-expanded', 'false');
+    row.onclick = () => onRowClick(item, row, 0);
     return row;
   }
 
-  function initSidebar() {
-    MENU.forEach((item, i) => ui.menuList.appendChild(buildMenuRow(item, i)));
-    setCurrentRow(ui.menuList.firstElementChild);
+  /* A row in a layer: text only, with an arrow when it opens another layer */
+  function buildLayerRow(item, depth, i) {
+    const opens = hasItems(item);
+    const row = el('button', { 'class': 'rw-layer-row' }, `<span></span>${opens ? `<i class="rw-chev">${ICONS.next}</i>` : ''}`);
+    setText(row.querySelector('span'), labelOf(item));
+    row.style.setProperty('--i', i);
+    if (opens) row.setAttribute('aria-expanded', 'false');
+    setRowState(row, item);
+    row.onclick = () => onRowClick(item, row, depth);
+    return row;
+  }
 
-    ui.backBtn.onclick = () => showView('menu');
-    ui.sidebarToggle.onclick = () => {
-      if (sidebarOpen) hideSidebar();
-      else setSidebarOpen(true);
-    };
+  /* Opens a layer for this item. depth = how many layers sit before it (0 = beside the rail).
+     A row with items gets a list of rows; a row with a panel gets that panel from cards.js. */
+  function openLayer(item, opener, depth) {
+    closeLayersFrom(depth);
+    const isContent = !hasItems(item);
 
-    /* Escape only applies while the keyboard is inside the menu. It is not a popup,
-       so Escape pressed elsewhere (such as on the welcome screen) leaves it alone. */
-    doc.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && sidebarOpen && ui.sidebar.contains(doc.activeElement)) hideSidebar();
+    const node = el('div', {
+      'class': 'rw-layer' + (isContent ? ' is-content' : ''),
+      role: 'group', id: 'rw-layer-' + (++layerCount)
+    }, `<div class="rw-layer-list"${isContent ? ' id="rw-panel"' : ''}></div>`);
+    node.setAttribute('aria-label', labelOf(item));   /* there is no title on screen, so screen readers get it here */
+    node.style.setProperty('--depth', depth);
+
+    const list = node.firstElementChild;
+    if (isContent) emit('rw:open', { panel: item.panel, container: list });   /* cards.js fills it */
+    else item.items.forEach((child, i) => list.appendChild(buildLayerRow(child, depth + 1, i)));
+    list.addEventListener('scroll', placeLayers, { passive: true });
+
+    ui.layers.appendChild(node);
+    layers.push({ node: node, opener: opener });
+    opener.classList.add('is-open');
+    opener.setAttribute('aria-expanded', 'true');
+    opener.setAttribute('aria-controls', node.id);
+    placeLayers();
+
+    void node.offsetWidth;                      /* start from the closed look, so it animates in */
+    node.classList.add('is-in');
+
+    /* Keyboard users land on the first row of the new layer */
+    const first = list.querySelector('button');
+    if (first && usedKeyboard(opener)) first.focus({ preventScroll: true });
+  }
+
+  /* True when this element was reached with the keyboard (older browsers just say no) */
+  function usedKeyboard(node) {
+    try { return node.matches(':focus-visible'); }
+    catch (e) { return false; }
+  }
+
+  /* Closes the layer at this depth and every layer after it */
+  function closeLayersFrom(depth) {
+    while (layers.length > depth) {
+      const layer = layers.pop();
+      layer.opener.classList.remove('is-open');
+      layer.opener.setAttribute('aria-expanded', 'false');
+      layer.node.classList.remove('is-in');
+      setTimeout(() => layer.node.remove(), 220);
+    }
+  }
+
+  /* Places the open layers, kept on screen and clear of the dock.
+       Desktop: side by side, each one lined up with the row that opened it.
+       Phones:  one column, each under the one before. The column lines up with the first
+                row and moves up if it runs too low (never back down while it is open, so rows
+                do not jump under a finger). If it still does not fit, the last layer scrolls. */
+  function placeLayers() {
+    if (!layers.length) return;
+    const unit = zoomUnit();
+    const railTop = ui.sidebar.getBoundingClientRect().top;
+    const topOf = (row) => (row.getBoundingClientRect().top - railTop) / unit;
+    const lowest = ui.sidebar.offsetHeight - (ui.dock.classList.contains('is-hidden') ? 16 : 96);
+    const across = ui.root.getBoundingClientRect().width / unit - ui.sidebar.offsetWidth - 18;   /* room right of the rail */
+
+    layers.forEach((layer) => {
+      layer.node.style.maxWidth = across + 'px';
+      layer.node.style.maxHeight = (lowest - 16) + 'px';
     });
 
-    const isPhone = ui.root.classList.contains('is-phone');
-    setSidebarOpen(CONFIG.sidebarStartsOpen && !isPhone);
+    if (!ui.root.classList.contains('is-phone')) {
+      layers.forEach((layer) => {
+        const top = Math.min(topOf(layer.opener) - 8, lowest - layer.node.offsetHeight);
+        layer.node.style.top = Math.max(16, top) + 'px';
+      });
+      return;
+    }
+
+    const gap = 8;
+    const heights = layers.map((layer) => layer.node.offsetHeight);
+    const total = heights.reduce((sum, height) => sum + height, 0) + gap * (layers.length - 1);
+    const first = layers[0];
+    let top = Math.max(16, Math.min(topOf(first.opener) - 8, lowest - total, first.columnTop || lowest));
+    first.columnTop = top;
+    layers.forEach((layer, i) => {
+      layer.node.style.top = top + 'px';
+      layer.node.style.maxHeight = (lowest - top) + 'px';
+      top += heights[i] + gap;
+    });
+  }
+
+  /* Hide moves the title, menu and dock away. Show brings them back. */
+  function setMenuVisible(visible) {
+    if (!visible) {
+      closeLayersFrom(0);
+    }
+    const focused = doc.activeElement;
+    ui.root.classList.toggle('sidebar-open', visible);
+    ui.root.classList.toggle('all-hidden', !visible);
+    /* Keyboard focus moves to the button that takes the pressed one's place */
+    if (focused === ui.hideBtn || focused === ui.showBtn) {
+      (visible ? ui.hideBtn : ui.showBtn).focus({ preventScroll: true });
+    }
+  }
+
+  function initSidebar() {
+    MENU.forEach((item, i) => ui.menuList.insertBefore(buildMenuRow(item, i), ui.hideBtn));
+    ui.hideBtn.style.animationDelay = slideInDelay(MENU.length);
+    setCurrentRow(ui.menuList.firstElementChild);
+
+    ui.hideBtn.onclick = () => setMenuVisible(false);
+    ui.showBtn.onclick = () => setMenuVisible(true);
+
+    /* Escape closes the layers, while the keyboard is inside the menu */
+    doc.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape' || !layers.length || !ui.sidebar.contains(doc.activeElement)) return;
+      const opener = layers[0].opener;
+      closeLayersFrom(0);
+      opener.focus({ preventScroll: true });
+    });
+
+    /* Clicking anywhere outside the menu and its layers (the panorama, say) closes the layers */
+    doc.addEventListener('pointerdown', (e) => {
+      if (layers.length && !ui.sidebar.contains(e.target)) closeLayersFrom(0);
+    }, true);
+
+    /* Keep the layers lined up when the screen size changes or the rail scrolls */
+    window.addEventListener('resize', () => {
+      placeLayers();
+    });
+    ui.menuList.addEventListener('scroll', placeLayers, { passive: true });
+
+    setMenuVisible(true);   /* the rail slides in when the tour starts */
   }
 
 
   /* =================================================================
-     SECTION 7. FULLSCREEN
+     SECTION 7. STAYING VISIBLE IN FULLSCREEN
+     There is no fullscreen button for now, but 3DVista's own one still works.
+     When something goes fullscreen, the menu moves into it so it stays on screen.
      ================================================================= */
   const html = doc.documentElement;
   const requestFs = html.requestFullscreen || html.webkitRequestFullscreen;
@@ -721,32 +1034,19 @@
 
   function onFullscreenChange() {
     const fsEl = fullscreenElement();
-    const on = !!fsEl;
-
-    ui.fullscreenBtn.innerHTML = on ? ICONS.exitFullscreen : ICONS.fullscreen;
-    ui.fullscreenBtn.setAttribute('aria-label', on ? 'Exit fullscreen' : 'Enter fullscreen');
-
-    /* If something else went fullscreen, keep our UI visible on top of it */
-    if (on && fsEl !== html && fsEl !== doc.body && !fsEl.contains(ui.root)) {
+    if (fsEl && fsEl !== html && fsEl !== doc.body && !fsEl.contains(ui.root)) {
+      /* A canvas or video cannot hold the menu, so the whole page goes fullscreen instead */
       if (/^(CANVAS|VIDEO|IFRAME|IMG)$/.test(fsEl.tagName)) {
         fsCall(exitFs, doc).then(() => fsCall(requestFs, html));
       } else {
         fsEl.appendChild(ui.root);
       }
-    } else if (!on && ui.root.parentNode !== ui.host) {
+    } else if (!fsEl && ui.root.parentNode !== ui.host) {
       ui.host.appendChild(ui.root);
     }
   }
 
-  function initFullscreen() {
-    if (!requestFs || !exitFs) {
-      ui.fullscreenBtn.style.display = 'none';
-      return;
-    }
-    ui.fullscreenBtn.onclick = () => {
-      if (fullscreenElement()) fsCall(exitFs, doc);
-      else fsCall(requestFs, html);
-    };
+  function initFullscreenFollow() {
     doc.addEventListener('fullscreenchange', onFullscreenChange);
     doc.addEventListener('webkitfullscreenchange', onFullscreenChange);
   }
@@ -754,11 +1054,18 @@
 
   /* =================================================================
      SECTION 8. BOTTOM DOCK
+     Pills for the rows of the panel opened last (setDockItems below).
      ================================================================= */
-  const pills = [];
+  const ALL_SCENES = SCENES.map((scene) => ({ scene: scene.index }));   /* for sections with no rows */
   let dockSizeWatcher = null;
 
-  function setDockVisible(visible) {
+  function setDockVisible(visible, instant) {
+    if (instant) {
+      ui.dock.classList.add('is-instant');
+    } else if (ui.dock.classList.contains('is-instant')) {
+      void ui.dock.offsetWidth;   /* let the browser settle first, so showing it again still animates */
+      ui.dock.classList.remove('is-instant');
+    }
     ui.dock.classList.toggle('is-hidden', !visible);
     if (visible) queueArrowUpdate();
   }
@@ -817,12 +1124,41 @@
     track.scrollLeft += e.deltaY * unit;
   }
 
-  function buildPill(scene) {
-    const pill = setText(el('button', { 'class': 'rw-pill' }), titleCase(scene.title));
-    pill.onclick = () => goToScene(scene.index);
-    ui.track.appendChild(pill);
-    pills.push(pill);
-    if (dockSizeWatcher) dockSizeWatcher.observe(pill);
+  /* The pills a panel puts in the dock: its rows, except the ones that open another panel.
+     A content panel from cards.js has no rows, so it shows every scene. */
+  function dockItemsOf(item) {
+    if (!hasItems(item)) return ALL_SCENES;
+    return item.items.filter((child) => child.scene != null || isWaiting(child));
+  }
+
+  /* Fills the dock with a pill for each of these menu items */
+  function setDockItems(items) {
+    ui.track.textContent = '';
+    items.forEach((item, order) => ui.track.appendChild(buildPill(item, order)));
+    ui.track.scrollLeft = 0;
+
+    /* Re-check the arrows whenever the strip or a pill changes size (a web font finishing loading, say) */
+    if (dockSizeWatcher) {
+      dockSizeWatcher.disconnect();
+      dockSizeWatcher.observe(ui.track);
+      [].forEach.call(ui.track.children, (pill) => dockSizeWatcher.observe(pill));
+    }
+    queueArrowUpdate();
+
+    /* One pill, or none, is not worth a dock, so it hides itself */
+    setDockVisible(items.length > 1, items.length <= 1);
+
+    const showing = ui.track.querySelector('.is-showing');
+    if (showing) centerPill(showing, true);
+  }
+
+  /* A pill goes to its scene, or shows dimmed while its row waits for a panorama */
+  function buildPill(item, order) {
+    const pill = setText(el('button', { 'class': 'rw-pill' }), labelOf(item));
+    pill.style.animationDelay = (120 + order * 55) + 'ms';   /* pills glide in one after another */
+    setRowState(pill, item);
+    if (item.scene != null) pill.onclick = () => goToScene(item.scene);
+    return pill;
   }
 
   function initDock() {
@@ -832,16 +1168,12 @@
     ui.track.addEventListener('wheel', onDockWheel, { passive: false });
 
     /* Re-check the arrows whenever the dock or a pill changes size
-       (window resize, side menu opening, phone layout, web font finishing loading) */
+       (window resize, phone layout, web font finishing loading). setDockItems picks the pills. */
     if (window.ResizeObserver) {
       dockSizeWatcher = new ResizeObserver(queueArrowUpdate);
-      dockSizeWatcher.observe(ui.track);
     } else {
       window.addEventListener('resize', queueArrowUpdate);
     }
-
-    SCENES.forEach(buildPill);
-    queueArrowUpdate();
   }
 
 
@@ -878,7 +1210,7 @@
     if (items && index >= items.length) return false;
 
     playlist.set('selectedIndex', index);
-    hideSidebarIfCoveringScene();
+    closeLayersOnPhone();
     return true;
   }
 
@@ -891,22 +1223,36 @@
     return scene ? scene.index : -1;
   }
 
-  /* Keeps the dock highlighting the scene that is showing */
+  /* Top right title: the name of the scene that is showing */
+  function setSceneTitle(text) {
+    ui.title.classList.toggle('is-empty', !text);
+    if (!text) return;
+    ui.titleText.classList.remove('is-in');
+    void ui.titleText.offsetWidth;
+    setText(ui.titleText, text);
+    ui.titleText.classList.add('is-in');
+  }
+
+  /* Lights up a panel row or dock pill when its scene is the one showing */
+  function markShowing(node) {
+    const showing = Number(node.dataset.scene) === shownIndex;
+    node.classList.toggle('is-showing', showing);
+    if (showing) node.setAttribute('aria-current', 'true');
+    else node.removeAttribute('aria-current');
+  }
+
+  /* Keeps the title, the dock and the open panels following the scene that is showing */
   function syncCurrentScene(instant) {
     const current = playlist ? playlist.get('selectedIndex') : 0;
     if (current === shownIndex) return;
     shownIndex = current;
 
-    SCENES.forEach((scene, i) => {
-      const isCurrent = scene.index === current;
-      pills[i].classList.toggle('is-current', isCurrent);
-      if (isCurrent) {
-        pills[i].setAttribute('aria-current', 'true');
-        centerPill(pills[i], instant);
-      } else {
-        pills[i].removeAttribute('aria-current');
-      }
-    });
+    const showing = SCENES.find((scene) => scene.index === current);
+    setSceneTitle(showing ? titleCase(showing.title) : '');
+
+    ui.root.querySelectorAll('[data-scene]').forEach(markShowing);   /* panel rows and dock pills */
+    const pill = ui.track.querySelector('.is-showing');
+    if (pill) centerPill(pill, instant);
   }
 
   function connectToPlaylist(found) {
@@ -971,7 +1317,7 @@
     return scale > 0 && scale < 1 ? scale : 1;
   }
 
-  /* Sets is-phone, is-short and is-narrow on the root. The styles for them are at the end of SECTION 3. */
+  /* Sets is-phone and is-short on the root. The styles for them are at the end of SECTION 3. */
   function fitToScreen() {
     const node = ui.root;
     let lastScale = -1;
@@ -987,7 +1333,6 @@
 
       node.classList.toggle('is-phone', isShort || width <= CONFIG.phoneMaxWidth);
       node.classList.toggle('is-short', isShort);
-      node.classList.toggle('is-narrow', width <= CONFIG.narrowMaxWidth);
     }
 
     update();
@@ -1011,8 +1356,9 @@
     buildUI();
     fitToScreen();
     initSidebar();
-    initFullscreen();
+    initFullscreenFollow();
     initDock();
+    setDockItems(dockItemsOf(MENU[0]));   /* the first section starts highlighted, so the dock follows it from the start */
     initPublicApi();
     waitForTour();
   }
