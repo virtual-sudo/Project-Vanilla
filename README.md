@@ -11,7 +11,7 @@ scripts from the **same folder**.
 |---|---|---|
 | `code1.js` | Navigation: menu, scene dock, scene switching, and responsive layout. | `SECTION 1` — settings, scenes, and menu items |
 | `code2.js` | Welcome page, transition into the tour, and visitor onboarding. | `SETTINGS` and `ONBOARDING` near the top |
-| `code3.js` | Content panels such as About and Residences; in `copy/`, it also contains panorama cards. | `SECTION 1` — content |
+
 
 Section maps at the top of each file describe the rest of that script. Search
 for a section name (for example, `SECTION 1. SETTINGS`) to jump to it.
